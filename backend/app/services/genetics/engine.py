@@ -1,264 +1,347 @@
-from typing import List, Dict, Optional, Any
+from math import exp, prod
+from typing import Any, Dict, List, Optional, Tuple
 from pydantic import BaseModel
 
-class ParentData(BaseModel):
-    genotypes: Dict[str, str]
-    blood: str
-    rh: str
 
 class PredictionInput(BaseModel):
-    mode: str  # "dual" | "single"
-    parent1: ParentData
-    parent2: Optional[ParentData] = None
+    mode: str  # "individual" | "parents"
+    father_sequence: Optional[str] = None
+    mother_sequence: Optional[str] = None
+    sequence: Optional[str] = None
 
-def autosomal_punnett(g1: str, g2: str) -> List[Dict[str, Any]]:
-    a1 = [g1[0], g1[1]]
-    a2 = [g2[0], g2[1]]
-    combos = {}
-    for x in a1:
-        for y in a2:
-            sorted_genotype = "".join(sorted([x, y]))
-            combos[sorted_genotype] = combos.get(sorted_genotype, 0) + 0.25
-    
-    results = []
-    for genotype, prob in combos.items():
-        upper = genotype.upper()
-        lower = genotype.lower()
-        status = "healthy"
-        if genotype == lower:
-            status = "affected"
-        elif genotype != upper:
-            status = "carrier"
-        results.append({"genotype": genotype, "probability": prob, "status": status})
-    return results
 
-def sickle_cell_punnett(g1: str, g2: str) -> List[Dict[str, Any]]:
-    a1 = [g1[0], g1[1]]
-    a2 = [g2[0], g2[1]]
-    combos = {}
-    for x in a1:
-        for y in a2:
-            sorted_genotype = "".join(sorted([x, y]))
-            combos[sorted_genotype] = combos.get(sorted_genotype, 0) + 0.25
-    
-    results = []
-    for genotype, prob in combos.items():
-        status = "healthy"
-        if genotype == "SS":
-            status = "affected"
-        elif genotype == "AS":
-            status = "carrier"
-        results.append({"genotype": genotype, "probability": prob, "status": status})
-    return results
+REFERENCE_GENES: Dict[str, str] = {
+    "HBB": "ATGGTGCACCTGACTCCTGAGGAGAAGTCTGCCGTTACTGCCCT",
+    "CFTR": "ATGGAATTTCGCGATGGTGTTTCCTATGATGAATATAGATACAGA",
+    "AZFA_sY84": "ATGCCTGGTGAGAAATGTTTGGCTTTGTTGGA",
+    "AZFA_sY86": "GTTTCCTGGATCGATGTGGCTCAGTTCCAGAA",
+    "AZFB_sY127": "CCACTGACTTTGGTGACCTGGATGCTGTACCT",
+    "AZFB_sY134": "ACTGCCTGACTTTGGGGACTGTTCCTGTGGAA",
+    "AZFC_sY254": "TGGGCCATTTGACATCTCCAGGTTCTGCTTGA",
+    "AZFC_sY255": "CGATGCTGATGGCCTTAGTTGGTGACTGTTGA",
+    "F8": "ATGAGAGAGGAAATGTTGGTCCTGCTATCAGTGGATGCCTCCGTA",
+    "ABO": "ATGGCCGCCGCTGCTGCTGCTGGCCCTGCTGCTGCTGGCGCT",
+    "RHD": "ATGGTGCTGCTGATCCTGCTGCTGCTGGCTCTGGTGCTGCTG",
+}
 
-def g6pd_prediction(g1: str, g2: str) -> Dict[str, Any]:
-    is_male1 = "Y" in g1
-    is_female2 = "Y" not in g2
+PATHOGENIC_MARKERS = {
+    "HBB_SICKLE_MUT": "GTG",
+    "HBB_SICKLE_WT": "GAG",
+    "ABO_261DEL_G": "GCCGCCGCTGCTGCTGCTGCCCTG",
+    "ABO_B_ARG176GLY": "CCTGCTGCTGGCGCTGACTGGGAA",
+    "ABO_B_GLY235SER": "GGCGCTGACTGGGAAGGTGCCATG",
+}
 
-    mother_x_alleles = []
-    father_x_allele = ""
 
-    if is_male1 and is_female2:
-        father_x_allele = "Xg" if "Xg" in g1 else "XG"
-        if g2 == "XGXg": mother_x_alleles = ["XG", "Xg"]
-        elif g2 == "XgXg": mother_x_alleles = ["Xg", "Xg"]
-        else: mother_x_alleles = ["XG", "XG"]
-    elif not is_male1 and not is_female2:
-        father_x_allele = "Xg" if "Xg" in g2 else "XG"
-        if g1 == "XGXg": mother_x_alleles = ["XG", "Xg"]
-        elif g1 == "XgXg": mother_x_alleles = ["Xg", "Xg"]
-        else: mother_x_alleles = ["XG", "XG"]
-    else:
-        mother_x_alleles = ["XG", "Xg"]
-        father_x_allele = "XG"
+def _sanitize_fasta(raw: str) -> str:
+    lines = [line.strip() for line in raw.strip().splitlines() if line.strip()]
+    if not lines or not lines[0].startswith(">"):
+        raise ValueError("Sequence must start with FASTA header '>'")
+    seq = "".join(lines[1:]).upper()
+    if not seq or any(ch not in {"A", "T", "C", "G", "N"} for ch in seq):
+        raise ValueError("Sequence payload must only include A/T/C/G/N")
+    n_ratio = seq.count("N") / len(seq)
+    if n_ratio > 0.10:
+        raise ValueError("Ambiguous bases (N) exceed 10%")
+    return seq
 
-    male_results = {}
-    female_results = {}
 
-    for mx in mother_x_alleles:
-        # Sons
-        son_genotype = f"{mx}Y"
-        son_status = "affected" if mx == "Xg" else "healthy"
-        male_results[son_genotype] = male_results.get(son_genotype, {"count": 0, "status": son_status})
-        male_results[son_genotype]["count"] += 1
+def _smith_waterman_identity(subject: str, ref: str, match: float = 2.0, mismatch: float = -1.0, gap_open: float = -2.0, gap_extend: float = -0.5) -> Tuple[float, int]:
+    m, n = len(subject), len(ref)
+    h = [[0.0] * (n + 1) for _ in range(m + 1)]
+    e = [[0.0] * (n + 1) for _ in range(m + 1)]
+    f = [[0.0] * (n + 1) for _ in range(m + 1)]
+    best = 0.0
 
-        # Daughters
-        daughter_genotype = "".join(sorted([mx, father_x_allele]))
-        daughter_status = "healthy"
-        if mx == "Xg" and father_x_allele == "Xg":
-            daughter_status = "affected"
-        elif mx == "Xg" or father_x_allele == "Xg":
-            daughter_status = "carrier"
-        
-        female_results[daughter_genotype] = female_results.get(daughter_genotype, {"count": 0, "status": daughter_status})
-        female_results[daughter_genotype]["count"] += 1
+    for i in range(1, m + 1):
+        for j in range(1, n + 1):
+            e[i][j] = max(h[i - 1][j] + gap_open, e[i - 1][j] + gap_extend)
+            f[i][j] = max(h[i][j - 1] + gap_open, f[i][j - 1] + gap_extend)
+            diag = h[i - 1][j - 1] + (match if subject[i - 1] == ref[j - 1] else mismatch)
+            h[i][j] = max(0.0, diag, e[i][j], f[i][j])
+            best = max(best, h[i][j])
 
-    total = len(mother_x_alleles)
-    male_child = [{"status": v["status"], "probability": v["count"] / total} for v in male_results.values()]
-    female_child = [{"status": v["status"], "probability": v["count"] / total} for v in female_results.values()]
+    identity = (best / (2.0 * max(1, len(ref)))) * 100.0
+    return min(100.0, max(0.0, identity)), int(round(best))
 
-    punnett = []
-    for g, v in male_results.items():
-        punnett.append({"genotype": g, "probability": (v["count"] / total) * 0.5, "status": v["status"]})
-    for g, v in female_results.items():
-        punnett.append({"genotype": g, "probability": (v["count"] / total) * 0.5, "status": v["status"]})
 
-    return {"punnett": punnett, "sexLinked": {"maleChild": male_child, "femaleChild": female_child}}
+def calculate_homology(sequence: str, reference: str, k: int = 4) -> float:
+    if not sequence or not reference:
+        return 0.0
+    sw_identity, _ = _smith_waterman_identity(sequence, reference)
+    if len(reference) < k or len(sequence) < k:
+        return max(0.0, min(1.0, sw_identity / 100.0))
 
-def predict_blood_group(b1: str, b2: str, rh1: str, rh2: str) -> Dict[str, Any]:
-    abo_alleles = {
-        "IAIA": ["IA", "IA"], "IAi": ["IA", "i"], "IBIB": ["IB", "IB"], "IBi": ["IB", "i"],
-        "IAIB": ["IA", "IB"], "ii": ["i", "i"],
-    }
-    a1 = abo_alleles.get(b1, ["i", "i"])
-    a2 = abo_alleles.get(b2, ["i", "i"])
-    abo_combos = {}
-    for x in a1:
-        for y in a2:
-            sorted_g = "".join(sorted([x, y]))
-            abo_combos[sorted_g] = abo_combos.get(sorted_g, 0) + 0.25
-    
-    genotype_to_group = {
-        "IAIA": "A", "IAi": "A", "iIA": "A", "IBIB": "B", "IBi": "B", "iIB": "B",
-        "IAIB": "AB", "IBIA": "AB", "ii": "O",
-    }
-    group_probs = {}
-    for g, p in abo_combos.items():
-        group = genotype_to_group.get(g, "O")
-        group_probs[group] = group_probs.get(group, 0) + p
-    
-    possible_groups = [{"group": group, "probability": prob} for group, prob in group_probs.items()]
+    ref_kmers = {reference[i : i + k] for i in range(len(reference) - k + 1)}
+    seq_kmers = {sequence[i : i + k] for i in range(len(sequence) - k + 1)}
+    kmer_overlap = len(ref_kmers & seq_kmers) / max(1, len(ref_kmers))
+    combined = (sw_identity / 100.0) * 0.6 + kmer_overlap * 0.4
+    return max(0.0, min(1.0, combined))
 
-    r1 = [rh1[0], rh1[1]]
-    r2 = [rh2[0], rh2[1]]
-    rh_combos = {}
-    for x in r1:
-        for y in r2:
-            sorted_rh = "".join(sorted([x, y]))
-            rh_combos[sorted_rh] = rh_combos.get(sorted_rh, 0) + 0.25
-    
-    rh_probs = {}
-    for g, p in rh_combos.items():
-        type_ = "Rh−" if g == "dd" else "Rh+"
-        rh_probs[type_] = rh_probs.get(type_, 0) + p
-    
-    possible_rh = [{"type": t, "probability": p} for t, p in rh_probs.items()]
 
-    combined = []
-    for g in possible_groups:
-        for r in possible_rh:
-            combined.append({
-                "type": f"{g['group']}{'+' if r['type'] == 'Rh+' else '−'}",
-                "probability": g["probability"] * r["probability"]
-            })
-    
-    return {"possibleGroups": possible_groups, "possibleRh": possible_rh, "combined": [c for c in combined if c["probability"] > 0]}
+def sigmoid_probability(homology: float, lambda_value: float, threshold: float) -> float:
+    return 1.0 / (1.0 + exp(lambda_value * (homology - threshold)))
 
-def calculate_immunity_score(diseases: List[Dict[str, Any]]) -> int:
-    if not diseases: return 85
-    weights = {"severe": 0.4, "moderate": 0.25, "mild": 0.15, "none": 0.05}
-    joint_risk = 0
-    for d in diseases:
-        w = weights.get(d["severity"], 0.1)
-        joint_risk += d["affectedProb"] * w
-    
-    avg_risk = joint_risk / len(diseases)
-    score = round(max(0, min(100, (1 - avg_risk * 3) * 100)))
-    return score
+
+def _infer_genotype(identity: float, pathogenic_count: int) -> Tuple[str, float]:
+    if identity >= 95.0 and pathogenic_count == 0:
+        return "N/N", 0.0
+    if identity < 75.0 and pathogenic_count >= 2:
+        return "M/M", 1.0
+    return "N/M", 0.5
+
+
+def _autosomal_parents_probs(pm_f: float, pm_m: float) -> Dict[str, float]:
+    pn_f = 1.0 - pm_f
+    pn_m = 1.0 - pm_m
+    return {"affected": pm_f * pm_m, "carrier": (pm_f * pn_m) + (pn_f * pm_m), "healthy": pn_f * pn_m}
+
+
+def _detect_abo_allele(seq: str) -> str:
+    if PATHOGENIC_MARKERS["ABO_261DEL_G"] in seq:
+        return "O"
+    if PATHOGENIC_MARKERS["ABO_B_ARG176GLY"] in seq or PATHOGENIC_MARKERS["ABO_B_GLY235SER"] in seq:
+        return "B"
+    return "A"
+
+
+def _detect_rhd(seq: str) -> str:
+    identity, _ = _smith_waterman_identity(seq, REFERENCE_GENES["RHD"])
+    return "+" if identity >= 75.0 else "-"
+
+
+def _blood_distribution(alleles_f: str, alleles_m: str, rh_f: str, rh_m: str) -> Dict[str, float]:
+    abo_pairs = [(a, b) for a in alleles_f for b in alleles_m]
+    rh_pairs = [(a, b) for a in rh_f for b in rh_m]
+    out = {k: 0.0 for k in ["A_positive", "A_negative", "B_positive", "B_negative", "AB_positive", "AB_negative", "O_positive", "O_negative"]}
+    for a1, a2 in abo_pairs:
+        if "A" in (a1, a2) and "B" in (a1, a2):
+            abo = "AB"
+        elif "A" in (a1, a2):
+            abo = "A"
+        elif "B" in (a1, a2):
+            abo = "B"
+        else:
+            abo = "O"
+        for r1, r2 in rh_pairs:
+            rh = "positive" if "+" in (r1, r2) else "negative"
+            key = f"{abo}_{rh}"
+            out[key] += 100.0 / (len(abo_pairs) * len(rh_pairs))
+    return {k: round(v, 2) for k, v in out.items()}
+
+
+def _severity_from_homology(h: float, is_y: bool = False) -> str:
+    if is_y and h < 0.85:
+        return "Severe Infertility"
+    if h >= 0.95:
+        return "Asymptomatic / Mild"
+    if 0.85 <= h < 0.95:
+        return "Moderate"
+    return "Severe / Pathogenic"
+
+
+def _severity_from_probabilities(affected: float, carrier: float, is_y: bool = False) -> str:
+    if is_y and affected > 0:
+        return "Severe Infertility"
+    if affected > 0:
+        return "Severe"
+    if carrier > 0:
+        return "Asymptomatic / Mild"
+    return "Asymptomatic / Mild"
+
+
+def _immunity_classification(score: int) -> str:
+    if score >= 90:
+        return "Excellent"
+    if score >= 70:
+        return "Good"
+    if score >= 50:
+        return "Moderate"
+    if score >= 30:
+        return "Low"
+    return "Very Low"
+
 
 def run_prediction(input_data: PredictionInput) -> Dict[str, Any]:
-    parent1 = input_data.parent1
-    parent2 = input_data.parent2
-    is_dual = input_data.mode == "dual" and parent2 is not None
+    mode = "parents" if input_data.mode in {"dual", "parents"} else "individual"
 
-    disease_results = []
-    sex_linked_result = {"maleChild": [], "femaleChild": []}
+    if mode == "individual":
+        if not input_data.sequence:
+            raise ValueError("Individual mode requires sequence")
+        seq_f = _sanitize_fasta(input_data.sequence)
+        seq_m = None
+    else:
+        if not input_data.father_sequence or not input_data.mother_sequence:
+            raise ValueError("Parents mode requires father_sequence and mother_sequence")
+        seq_f = _sanitize_fasta(input_data.father_sequence)
+        seq_m = _sanitize_fasta(input_data.mother_sequence)
 
-    # Beta Thalassemia
-    bt_g1 = parent1.genotypes.get("beta_thalassemia", "AA")
-    bt_g2 = parent2.genotypes.get("beta_thalassemia", "AA") if is_dual else "AA"
-    bt_punnett = autosomal_punnett(bt_g1, bt_g2)
-    bt_affected = sum(p["probability"] for p in bt_punnett if p["status"] == "affected")
-    bt_carrier = sum(p["probability"] for p in bt_punnett if p["status"] == "carrier")
-    disease_results.append({
-        "disease": "Beta Thalassemia", "gene": "HBB", "chromosome": "11", "inheritance": "Autosomal Recessive",
-        "color": "#10b981", "parent1Genotype": bt_g1, "parent2Genotype": bt_g2, "punnettSquare": bt_punnett,
-        "affectedProb": bt_affected, "carrierProb": bt_carrier, "healthyProb": 1 - bt_affected - bt_carrier,
-        "severity": "severe" if bt_affected > 0.2 else "moderate" if bt_carrier > 0.4 else "mild" if bt_carrier > 0 else "none",
-        "mutationDetected": "a" in bt_g1 or "a" in bt_g2,
-        "mutationDetails": "HBB gene mutation detected: β-globin chain variant" if ("a" in bt_g1 or "a" in bt_g2) else "No mutation detected",
-    })
+    model_params = {
+        "Beta-Thalassemia": {"gene": "HBB", "T": 0.96, "lambda": 150.0},
+        "Cystic Fibrosis": {"gene": "CFTR", "T": 0.94, "lambda": 120.0},
+        "Sickle Cell Disease": {"gene": "HBB", "T": 0.98, "lambda": 200.0},
+        "Y-Chromosome Infertility": {"gene": "AZF", "T": 0.85, "lambda": 80.0},
+    }
+    genes = ["Beta-Thalassemia", "Cystic Fibrosis", "Sickle Cell Disease"]
+    diseases: List[Dict[str, Any]] = []
+    affected_probs_for_joint: Dict[str, float] = {}
+    mutation_detection_details: List[str] = []
+    disease_severity_prediction: List[Dict[str, str]] = []
+    homology_scores: Dict[str, Dict[str, float]] = {}
 
-    # Sickle Cell
-    sc_g1 = parent1.genotypes.get("sickle_cell", "AA")
-    sc_g2 = parent2.genotypes.get("sickle_cell", "AA") if is_dual else "AA"
-    sc_punnett = sickle_cell_punnett(sc_g1, sc_g2)
-    sc_affected = sum(p["probability"] for p in sc_punnett if p["status"] == "affected")
-    sc_carrier = sum(p["probability"] for p in sc_punnett if p["status"] == "carrier")
-    disease_results.append({
-        "disease": "Sickle Cell Disease", "gene": "HBB", "chromosome": "11", "inheritance": "Autosomal Recessive",
-        "color": "#14b8a6", "parent1Genotype": sc_g1, "parent2Genotype": sc_g2, "punnettSquare": sc_punnett,
-        "affectedProb": sc_affected, "carrierProb": sc_carrier, "healthyProb": 1 - sc_affected - sc_carrier,
-        "severity": "severe" if sc_affected > 0.2 else "moderate" if sc_carrier > 0.4 else "mild" if sc_carrier > 0 else "none",
-        "mutationDetected": "S" in sc_g1 or "S" in sc_g2,
-        "mutationDetails": "HBB gene: Glu6Val substitution (sickle mutation)" if ("S" in sc_g1 or "S" in sc_g2) else "No mutation detected",
-    })
+    for disease_name in genes:
+        gene = model_params[disease_name]["gene"]
+        h_f = calculate_homology(seq_f, REFERENCE_GENES[gene])
+        pm_f = sigmoid_probability(h_f, model_params[disease_name]["lambda"], model_params[disease_name]["T"])
+        gf = "M/M" if pm_f >= 0.75 else "N/M" if pm_f >= 0.25 else "N/N"
 
-    # G6PD
-    g6_g1 = parent1.genotypes.get("g6pd_deficiency", "XGY")
-    g6_g2 = parent2.genotypes.get("g6pd_deficiency", "XGX") if is_dual else "XGX"
-    g6_res = g6pd_prediction(g6_g1, g6_g2)
-    g6_affected = sum(p["probability"] for p in g6_res["punnett"] if p["status"] == "affected")
-    g6_carrier = sum(p["probability"] for p in g6_res["punnett"] if p["status"] == "carrier")
-    sex_linked_result = g6_res["sexLinked"]
-    disease_results.append({
-        "disease": "G6PD Deficiency", "gene": "G6PD", "chromosome": "X", "inheritance": "X-Linked Recessive",
-        "color": "#f59e0b", "parent1Genotype": g6_g1, "parent2Genotype": g6_g2, "punnettSquare": g6_res["punnett"],
-        "affectedProb": g6_affected, "carrierProb": g6_carrier, "healthyProb": 1 - g6_affected - g6_carrier,
-        "severity": "moderate" if g6_affected > 0.3 else "mild" if g6_affected > 0 else "none",
-        "mutationDetected": "Xg" in g6_g1 or "Xg" in g6_g2,
-        "mutationDetails": "G6PD gene: Enzyme deficiency variant detected" if ("Xg" in g6_g1 or "Xg" in g6_g2) else "No mutation detected",
-    })
+        if mode == "parents" and seq_m is not None:
+            h_m = calculate_homology(seq_m, REFERENCE_GENES[gene])
+            pm_m = sigmoid_probability(h_m, model_params[disease_name]["lambda"], model_params[disease_name]["T"])
+            gm = "M/M" if pm_m >= 0.75 else "N/M" if pm_m >= 0.25 else "N/N"
+            probs = _autosomal_parents_probs(pm_f, pm_m)
+        else:
+            # Individual mode fallback: assume unknown partner contributes wild-type.
+            h_m, gm, pm_m = 1.0, "N/N", 0.0
+            probs = _autosomal_parents_probs(pm_f, pm_m)
 
-    # Y-Chromosome Infertility
-    y_g1 = parent1.genotypes.get("y_chromosome_infertility", "normal")
-    y_g2 = parent2.genotypes.get("y_chromosome_infertility", "normal") if is_dual else "normal"
-    y_affected = 0.5 if (y_g1 != "normal" or y_g2 != "normal") else 0
-    disease_results.append({
-        "disease": "Y-Chromosome Infertility", "gene": "AZF", "chromosome": "Y", "inheritance": "Y-Linked",
-        "color": "#f97316", "parent1Genotype": y_g1, "parent2Genotype": y_g2,
-        "punnettSquare": [
-            {"genotype": "Normal Y", "probability": 1 - y_affected, "status": "healthy"},
-            {"genotype": "Deleted AZF", "probability": y_affected, "status": "affected"},
-        ],
-        "affectedProb": y_affected, "carrierProb": 0, "healthyProb": 1 - y_affected,
-        "severity": "severe" if y_affected > 0 else "none",
-        "mutationDetected": y_g1 != "normal" or y_g2 != "normal",
-        "mutationDetails": f"AZF region: {y_g1.replace('_del', ' deletion').replace('azf', 'AZF')} detected" if y_g1 != "normal" else "No microdeletions detected",
-    })
+        severity_label = _severity_from_homology(min(h_f, h_m))
+        affected_probs_for_joint[disease_name] = probs["affected"]
+        homology_scores[disease_name] = {"father": round(h_f, 4), "mother": round(h_m, 4)}
+        disease_severity_prediction.append({"disease": disease_name, "severity": severity_label})
 
-    # Blood Group
-    b1, b2 = parent1.blood, (parent2.blood if is_dual else "ii")
-    rh1, rh2 = parent1.rh, (parent2.rh if is_dual else "Dd")
-    blood_group_res = predict_blood_group(b1, b2, rh1, rh2)
+        mutations: List[str] = []
+        if disease_name == "Sickle Cell Disease" and PATHOGENIC_MARKERS["HBB_SICKLE_MUT"] in seq_f and PATHOGENIC_MARKERS["HBB_SICKLE_WT"] in REFERENCE_GENES["HBB"]:
+            msg = "Mutation Detected: HBB Glu6Val (rs334) - Sickle Cell Trait"
+            mutations.append(msg)
+            mutation_detection_details.append(msg)
 
-    # Immunity
-    immunity_score = calculate_immunity_score(disease_results)
+        diseases.append(
+            {
+                "name": disease_name,
+                "inheritance_type": "Autosomal Recessive",
+                "general_probabilities": {k: round(v * 100.0, 1) for k, v in probs.items()},
+                "sex_split": {
+                    "male_child": {"affected": round(probs["affected"] * 100.0, 1), "carrier": round(probs["carrier"] * 100.0, 1), "healthy": round(probs["healthy"] * 100.0, 1)},
+                    "female_child": {"affected": round(probs["affected"] * 100.0, 1), "carrier": round(probs["carrier"] * 100.0, 1), "healthy": round(probs["healthy"] * 100.0, 1)},
+                },
+                "severity": {"score": round((1.0 - min(h_f, h_m)) * 100.0, 1), "classification": severity_label},
+                "mutations_detected": mutations,
+                "genotype_inference": {"father": gf, "mother": gm},
+                "carrier_risk_score": round(probs["carrier"] * 100.0, 1),
+                "carrier_warning": f"Child has a {round(probs['carrier'] * 100.0, 1)}% continuous probability of carrying {disease_name} silently."
+                if probs["carrier"] > probs["affected"] and probs["carrier"] > 0.15
+                else "",
+            }
+        )
 
-    # Carrier Status Summary
-    carrier_status = [
+    # Y-linked AZF model
+    azf_scores = {}
+    for marker in ["AZFA_sY84", "AZFA_sY86", "AZFB_sY127", "AZFB_sY134", "AZFC_sY254", "AZFC_sY255"]:
+        identity, _ = _smith_waterman_identity(seq_f, REFERENCE_GENES[marker])
+        azf_scores[marker] = 1.0 - (identity / 100.0)
+    azfa = max(azf_scores["AZFA_sY84"], azf_scores["AZFA_sY86"])
+    azfb = max(azf_scores["AZFB_sY127"], azf_scores["AZFB_sY134"])
+    azfc = max(azf_scores["AZFC_sY254"], azf_scores["AZFC_sY255"])
+
+    h_azf = max(0.0, min(1.0, 1.0 - max(azfa, azfb, azfc)))
+    y_prob = sigmoid_probability(h_azf, model_params["Y-Chromosome Infertility"]["lambda"], model_params["Y-Chromosome Infertility"]["T"])
+    affected_probs_for_joint["Y-Chromosome Infertility"] = y_prob
+    homology_scores["Y-Chromosome Infertility"] = {"father": round(h_azf, 4), "mother": 1.0}
+    y_severity = _severity_from_homology(h_azf, is_y=True)
+    disease_severity_prediction.append({"disease": "Y-Chromosome Infertility", "severity": y_severity})
+
+    diseases.append(
         {
-            "disease": d["disease"],
-            "probability": d["carrierProb"],
-            "status": "High" if d["carrierProb"] > 0.4 else "Moderate" if d["carrierProb"] > 0.2 else "Low" if d["carrierProb"] > 0 else "None"
+            "name": "Y-Chromosome Infertility",
+            "inheritance_type": "Y-Linked",
+            "general_probabilities": None,
+            "sex_split": {
+                "male_child": {"affected": round(y_prob * 100.0, 1), "carrier": 0.0, "healthy": round((1.0 - y_prob) * 100.0, 1)},
+                "female_child": {"affected": 0.0, "carrier": 0.0, "healthy": 100.0},
+            },
+            "severity": {"score": round((1.0 - h_azf) * 100.0, 1), "classification": y_severity},
+            "mutations_detected": [f"AZFa deletion score {azfa:.2f}", f"AZFb deletion score {azfb:.2f}", f"AZFc deletion score {azfc:.2f}"],
+            "carrier_risk_score": 0.0,
+            "carrier_warning": "",
         }
-        for d in disease_results
+    )
+
+    # Blood group model
+    abo_f = _detect_abo_allele(seq_f)
+    rh_f = _detect_rhd(seq_f)
+    if mode == "parents" and seq_m is not None:
+        abo_m = _detect_abo_allele(seq_m)
+        rh_m = _detect_rhd(seq_m)
+    else:
+        abo_m = abo_f
+        rh_m = rh_f
+    blood_dist = _blood_distribution(abo_f + "O", abo_m + "O", rh_f + "-", rh_m + "-")
+    if all(v == 0 for v in blood_dist.values()):
+        blood_dist = {
+            "O_positive": 33.0,
+            "A_positive": 27.0,
+            "B_positive": 31.0,
+            "AB_positive": 9.0,
+        }
+    blood_dist_non_zero = {k: v for k, v in blood_dist.items() if v > 0}
+
+    # Immunity score model (JSP with carrier penalty)
+    thal_aff = affected_probs_for_joint.get("Beta-Thalassemia", 0.0)
+    cf_aff = affected_probs_for_joint.get("Cystic Fibrosis", 0.0)
+    sickle_aff = affected_probs_for_joint.get("Sickle Cell Disease", 0.0)
+    jsp = (1.0 - thal_aff) * (1.0 - cf_aff) * (1.0 - sickle_aff)
+    base_immunity = jsp * 100.0
+    carrier_avg = (
+        sum(
+            (d["general_probabilities"]["carrier"] / 100.0)
+            for d in diseases
+            if d["inheritance_type"] == "Autosomal Recessive" and d["general_probabilities"] is not None
+        )
+        / 3.0
+    )
+    modifier = carrier_avg * 10.0
+    immunity = max(0, min(100, round(base_immunity - modifier)))
+
+    carrier_status_prediction = [
+        {
+            "disease": d["name"],
+            "carrier_probability": round(d["general_probabilities"]["carrier"], 1) if d["general_probabilities"] else 0.0,
+            "warning": d.get("carrier_warning", ""),
+        }
+        for d in diseases
+        if d["inheritance_type"] == "Autosomal Recessive"
     ]
 
+    sex_linked_split = {
+        "Male": {
+            "Y-Infertility": round(affected_probs_for_joint["Y-Chromosome Infertility"] * 100.0, 1),
+            "CF": round(cf_aff * 100.0, 1),
+        },
+        "Female": {
+            "Y-Infertility": 0.0,
+            "CF": round(cf_aff * 100.0, 1),
+        },
+    }
+
     return {
-        "diseases": disease_results,
-        "bloodGroup": blood_group_res,
-        "immunityScore": immunity_score,
-        "carrierStatus": carrier_status,
-        "sexLinked": sex_linked_result
+        "mode": mode,
+        # 1. Monogenic Disease Risk Scoring
+        "monogenic_disease_risk_scoring": diseases,
+        # 2. Immunity Points
+        "immunity_score": {"value": immunity, "classification": _immunity_classification(immunity)},
+        # 3. Carrier Status Prediction Summary
+        "carrier_status_prediction": carrier_status_prediction,
+        # 4. Predicted Blood Group (>0 only)
+        "blood_group_probabilities": blood_dist_non_zero,
+        # 5. Mutation Detection Details
+        "mutation_detection_details": mutation_detection_details,
+        # 6. Disease Severity Prediction
+        "disease_severity_prediction": disease_severity_prediction,
+        # 7. Sex-Linked Split Predictions
+        "sex_linked_split": sex_linked_split,
+        "sex_linked_split_predictions": sex_linked_split,
+        "homology_scores": homology_scores,
+        # Backward compatibility for existing components
+        "diseases": diseases,
     }

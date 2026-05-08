@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, AlertCircle } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { DualParentInput } from "@/components/prediction/DualParentInput";
 import { PredictionResults } from "@/components/prediction/PredictionResults";
@@ -11,21 +11,17 @@ import { api } from "@/services/api";
 
 export default function PredictPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const mode = searchParams.get("mode") === "dual" ? "parents" : "individual";
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<any>(null);
 
-  const handlePredict = async (parent1: any, parent2: any) => {
+  const handlePredict = async (payload: { mode: "individual" | "parents"; sequence?: string; father_sequence?: string; mother_sequence?: string }) => {
     setIsLoading(true);
     setError(null);
     try {
-      const data = {
-        mode: "dual",
-        parent1,
-        parent2
-      };
-      
-      const response = await api.prediction.predict(data);
+      const response = await api.prediction.predict(payload);
       setResult(response);
     } catch (err: any) {
       setError(err.message || "Failed to run prediction analysis");
@@ -55,7 +51,7 @@ export default function PredictPage() {
             Prediction Lab
           </h1>
           <p className="text-muted-foreground">
-            Configure parental genotypes to simulate potential offspring traits.
+            Upload FASTA sequence(s) to run probabilistic genomic risk analysis.
           </p>
         </div>
       </div>
@@ -80,7 +76,7 @@ export default function PredictPage() {
           transition={{ duration: 0.5 }}
           className={result ? "pointer-events-none" : ""}
         >
-          <DualParentInput onPredict={handlePredict} isLoading={isLoading} />
+          <DualParentInput mode={mode} onPredict={handlePredict} isLoading={isLoading} />
         </motion.div>
 
         {result && (
