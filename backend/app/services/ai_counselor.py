@@ -36,6 +36,7 @@ def build_prompt(message: str, pdf_text: Optional[str] = None) -> str:
         "<Final clinical response here>\n"
         "[/RESPONSE]\n"
         "Do not deviate from this format. I will be parsing your output based on these specific tags.\n"
+        "Take your time and thoughtfully analyze the context, especially if a PDF lab report is attached. Ensure a highly accurate and comprehensive clinical answer.\n"
     )
     if pdf_text:
         base += f'Context from attached Lab Report:\n"{pdf_text}"\n'
@@ -50,12 +51,13 @@ async def generate_counselor_response(message: str, mode: str = "general", pdf_t
         "prompt": prompt, 
         "stream": False,
         "options": {
-            "temperature": 0.1,
+            "temperature": 0.2,
             "top_p": 0.9,
-            "num_predict": 350,
+            "num_predict": 2048,
+            "num_ctx": 16384,
         }
     }
-    async with httpx.AsyncClient(timeout=120.0) as client:
+    async with httpx.AsyncClient(timeout=600.0) as client:
         response = await client.post(f"{OLLAMA_BASE_URL}/api/generate", json=payload)
         response.raise_for_status()
         data = response.json()
@@ -190,14 +192,15 @@ async def stream_counselor_response(message: str, mode: str = "general", pdf_tex
         "prompt": prompt, 
         "stream": True,
         "options": {
-            "temperature": 0.1,
+            "temperature": 0.2,
             "top_p": 0.9,
-            "num_predict": 350,
+            "num_predict": 2048,
+            "num_ctx": 16384,
         }
     }
     state: dict = {}
 
-    async with httpx.AsyncClient(timeout=180.0) as client:
+    async with httpx.AsyncClient(timeout=600.0) as client:
         async with client.stream("POST", f"{OLLAMA_BASE_URL}/api/generate", json=payload) as response:
             response.raise_for_status()
             async for line in response.aiter_lines():

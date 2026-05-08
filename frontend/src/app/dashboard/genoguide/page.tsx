@@ -185,15 +185,15 @@ export default function GenoGuidePage() {
                       />
                     </div>
                   ) : (
-                    <div className="flex flex-col gap-3 my-4 max-w-[85%] min-w-0 flex-1">
+                    <div className="flex flex-col gap-2 my-2 max-w-[85%] min-w-0 flex-1">
                       {loading && msg.id === messages[messages.length - 1]?.id && !msg.thought && !msg.response && !msg.content ? (
-                        <div className="chat-bubble-ai rounded-2xl px-4 py-3 flex items-center gap-2 text-sm text-slate/80 w-max">
+                        <div className="chat-bubble-ai rounded-2xl px-3 py-2 flex items-center gap-2 text-sm text-slate/80 w-max">
                           <Loader2 className="h-4 w-4 animate-spin" /> Formulating guidance…
                         </div>
                       ) : null}
                       
                       {msg.content && !msg.thought && !msg.response ? (
-                         <div className="bg-white border border-blue-100 shadow-sm rounded-lg p-4 mx-2">
+                         <div className="bg-white border border-blue-100 shadow-sm rounded-lg p-3">
                            <div
                              className="text-base text-slate-800 leading-relaxed whitespace-pre-wrap"
                              dangerouslySetInnerHTML={{
@@ -210,13 +210,13 @@ export default function GenoGuidePage() {
                       ) : null}
 
                       {msg.thought ? (
-                        <div className="bg-slate-100 border border-slate-200 rounded-lg p-4 mx-2">
+                        <div className="bg-slate-100 border border-slate-200 rounded-lg p-3">
                           <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">🧠 Internal Reasoning</h4>
                           <p className="text-sm text-slate-600 font-mono italic whitespace-pre-wrap">{msg.thought}</p>
                         </div>
                       ) : null}
                       {msg.response ? (
-                        <div className="bg-white border border-blue-100 shadow-sm rounded-lg p-4 mx-2">
+                        <div className="bg-white border border-blue-100 shadow-sm rounded-lg p-3">
                           <h4 className="text-[10px] font-bold text-blue-600 uppercase tracking-wider mb-2">💡 Clinical Counsel</h4>
                           <div
                             className="text-base text-slate-800 leading-relaxed whitespace-pre-wrap"
