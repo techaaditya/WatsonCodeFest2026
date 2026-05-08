@@ -44,7 +44,7 @@ function generateResponse(question: string): string {
     if (q.includes(key)) return response;
   }
   if (q.includes("hello") || q.includes("hi")) {
-    return "Hello! I'm **GenoGuide**, your genetic counselor assistant. 🧬\n\nI can help you understand:\n- Genetic diseases (Beta Thalassemia, Sickle Cell, G6PD, Y-Chromosome conditions)\n- Inheritance patterns and Punnett squares\n- Carrier screening and risk assessment\n- Blood group inheritance\n- Immunity scoring\n\nWhat would you like to know?";
+    return "Hello — I'm **GenoGuide**, your genetic counseling guide.\n\nI can help you understand:\n- Genetic diseases (Beta Thalassemia, Sickle Cell, G6PD, Y-Chromosome conditions)\n- Inheritance patterns and Punnett squares\n- Carrier screening and risk assessment\n- Blood group inheritance\n- Immunity scoring\n\nWhat would you like to explore?";
   }
   if (q.includes("nepal") || q.includes("region")) {
     return "**Genetic Diseases in Nepal:**\n\n1. **Beta Thalassemia** — Common across multiple ethnic groups, limited screening\n2. **Sickle Cell Disease** — Prevalent in Tharu communities of Terai\n3. **G6PD Deficiency** — Found in South Asian populations\n4. **Y-Chromosome conditions** — Under-diagnosed due to social stigma\n\nNepal faces challenges in genetic screening access, making tools like GenoVault critical for early carrier detection and family planning.";
@@ -57,7 +57,8 @@ export default function GenoGuidePage() {
     {
       id: "welcome",
       role: "assistant",
-      content: "Welcome to **GenoGuide**! 🧬\n\nI'm your AI genetic counselor. I can help you understand genetic diseases, inheritance patterns, carrier risks, and more.\n\nChoose a suggested topic below or type your question.",
+      content:
+        "Welcome to **GenoGuide**.\n\nThis is a clinical explainer to help you understand genetic diseases, inheritance patterns, and carrier risks.\n\nChoose a suggested topic below or type your question.",
       timestamp: new Date(),
     },
   ]);
@@ -94,16 +95,16 @@ export default function GenoGuidePage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-2">
-              <Bot className="h-6 w-6 text-gene-amber" /> GenoGuide
+              <Bot className="h-6 w-6 text-olive" /> GenoGuide
             </h1>
-            <p className="text-sm text-muted-foreground mt-0.5">AI-Powered Genetic Counselor</p>
+            <p className="text-sm text-slate/80 mt-0.5">Genetic counseling, explained clearly.</p>
           </div>
           <Tabs value={mode} onValueChange={(v) => setMode(v as "general" | "specific")}>
-            <TabsList className="bg-muted/30 border border-border/50">
-              <TabsTrigger value="general" className="data-[state=active]:bg-gene-emerald/10 data-[state=active]:text-gene-emerald text-xs">
+            <TabsList className="bg-cream border border-beige rounded-full p-1">
+              <TabsTrigger value="general" className="rounded-full text-xs data-[state=active]:bg-olive data-[state=active]:text-cream text-slate">
                 <Sparkles className="h-3 w-3 mr-1" /> General
               </TabsTrigger>
-              <TabsTrigger value="specific" className="data-[state=active]:bg-gene-amber/10 data-[state=active]:text-gene-amber text-xs">
+              <TabsTrigger value="specific" className="rounded-full text-xs data-[state=active]:bg-olive data-[state=active]:text-cream text-slate">
                 <Dna className="h-3 w-3 mr-1" /> Get Specific
               </TabsTrigger>
             </TabsList>
@@ -112,7 +113,7 @@ export default function GenoGuidePage() {
       </motion.div>
 
       {/* Chat Area */}
-      <div className="flex-1 gene-card rounded-2xl flex flex-col overflow-hidden">
+      <div className="flex-1 rounded-3xl flex flex-col overflow-hidden bg-cream border border-beige shadow-[0_18px_40px_rgba(45,58,35,0.08)]">
         <ScrollArea className="flex-1 p-4 sm:p-6" ref={scrollRef}>
           <div className="space-y-4">
             <AnimatePresence>
@@ -124,8 +125,8 @@ export default function GenoGuidePage() {
                   className={`flex gap-3 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
                 >
                   {msg.role === "assistant" && (
-                    <div className="w-8 h-8 rounded-full bg-gene-amber/10 border border-gene-amber/20 flex items-center justify-center shrink-0 mt-1">
-                      <Bot className="h-4 w-4 text-gene-amber" />
+                    <div className="w-8 h-8 rounded-full bg-white border border-beige flex items-center justify-center shrink-0 mt-1">
+                      <Bot className="h-4 w-4 text-olive" />
                     </div>
                   )}
                   <div className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
@@ -135,12 +136,12 @@ export default function GenoGuidePage() {
                       __html: msg.content
                         .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
                         .replace(/\n/g, '<br/>')
-                        .replace(/```([\s\S]*?)```/g, '<pre class="bg-background/50 rounded p-2 mt-2 mb-2 text-xs font-mono overflow-x-auto">$1</pre>')
+                        .replace(/```([\s\S]*?)```/g, '<pre class="bg-cream rounded-2xl border border-beige p-3 mt-2 mb-2 text-xs font-mono overflow-x-auto">$1</pre>')
                     }} />
                   </div>
                   {msg.role === "user" && (
-                    <div className="w-8 h-8 rounded-full bg-gene-emerald/10 border border-gene-emerald/20 flex items-center justify-center shrink-0 mt-1">
-                      <User className="h-4 w-4 text-gene-emerald" />
+                    <div className="w-8 h-8 rounded-full bg-softgreen/25 border border-softgreen/40 flex items-center justify-center shrink-0 mt-1">
+                      <User className="h-4 w-4 text-slate" />
                     </div>
                   )}
                 </motion.div>
@@ -148,11 +149,11 @@ export default function GenoGuidePage() {
             </AnimatePresence>
             {loading && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex gap-3">
-                <div className="w-8 h-8 rounded-full bg-gene-amber/10 border border-gene-amber/20 flex items-center justify-center shrink-0">
-                  <Bot className="h-4 w-4 text-gene-amber" />
+                <div className="w-8 h-8 rounded-full bg-white border border-beige flex items-center justify-center shrink-0">
+                  <Bot className="h-4 w-4 text-olive" />
                 </div>
-                <div className="chat-bubble-ai rounded-2xl px-4 py-3 flex items-center gap-2 text-sm text-muted-foreground">
-                  <Loader2 className="h-4 w-4 animate-spin" /> Thinking...
+                <div className="chat-bubble-ai rounded-2xl px-4 py-3 flex items-center gap-2 text-sm text-slate/80">
+                  <Loader2 className="h-4 w-4 animate-spin" /> Formulating guidance…
                 </div>
               </motion.div>
             )}
@@ -164,7 +165,7 @@ export default function GenoGuidePage() {
           <div className="px-4 pb-3 flex flex-wrap gap-2">
             {suggestions.slice(0, 4).map((s, i) => (
               <button key={i} onClick={() => sendMessage(s)}
-                className="px-3 py-1.5 rounded-full text-xs border border-gene-emerald/20 text-gene-emerald hover:bg-gene-emerald/5 transition-all">
+                className="px-3 py-1.5 rounded-full text-xs border border-beige text-olive hover:bg-beige/25 transition-all">
                 {s}
               </button>
             ))}
@@ -172,18 +173,21 @@ export default function GenoGuidePage() {
         )}
 
         {/* Input */}
-        <div className="p-4 border-t border-border/30">
+        <div className="p-4 border-t border-beige bg-white">
           <div className="flex gap-2">
             <Textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(input); } }}
               placeholder={mode === "general" ? "Ask about genetics..." : "Ask about a specific gene or disease..."}
-              className="min-h-[44px] max-h-[120px] resize-none bg-background/50 border-border/50 focus:border-gene-emerald/50"
+              className="min-h-[44px] max-h-[120px] resize-none bg-cream border-beige focus:border-olive text-slate rounded-2xl"
               rows={1}
             />
             <Button onClick={() => sendMessage(input)} disabled={!input.trim() || loading}
-              className="h-[44px] w-[44px] shrink-0 bg-gene-emerald hover:bg-gene-emerald/90 text-gene-deep p-0">
+              className="h-[44px] w-[44px] shrink-0 rounded-2xl bg-olive hover:bg-softgreen hover:text-slate text-cream p-0 transition-colors"
+              aria-label="Send message"
+              title="Send"
+            >
               <Send className="h-4 w-4" />
             </Button>
           </div>

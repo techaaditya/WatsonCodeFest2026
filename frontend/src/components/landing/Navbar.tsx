@@ -30,9 +30,7 @@ export function Navbar() {
       animate={{ y: 0 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-        scrolled
-          ? "gene-glass shadow-lg shadow-gene-emerald/5"
-          : "bg-transparent"
+        scrolled ? "bg-background/90 backdrop-blur-sm border-b border-beige" : "bg-transparent"
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -40,12 +38,11 @@ export function Navbar() {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2.5 group">
             <div className="relative">
-              <Dna className="h-8 w-8 text-gene-emerald transition-transform duration-500 group-hover:rotate-180" />
-              <div className="absolute inset-0 bg-gene-emerald/20 blur-lg rounded-full scale-0 group-hover:scale-150 transition-transform duration-500" />
+              <Dna className="h-8 w-8 text-olive transition-transform duration-500 group-hover:rotate-180" />
             </div>
             <span className="text-xl font-bold tracking-tight">
-              <span className="text-foreground">Geno</span>
-              <span className="text-gene-emerald">Vault</span>
+              <span className="text-olive">Geno</span>
+              <span className="text-softgreen">Vault</span>
             </span>
           </Link>
 
@@ -55,10 +52,10 @@ export function Navbar() {
               <a
                 key={link.href}
                 href={link.href}
-                className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-gene-emerald transition-colors duration-300 relative group"
+                className="px-4 py-2 text-sm font-medium text-slate hover:text-olive transition-colors duration-300 relative group"
               >
                 {link.label}
-                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-gene-emerald transition-all duration-300 group-hover:w-3/4 rounded-full" />
+                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-softgreen transition-all duration-300 group-hover:w-3/4 rounded-full" />
               </a>
             ))}
           </nav>
@@ -68,13 +65,13 @@ export function Navbar() {
             <Link href="/login">
               <Button
                 variant="ghost"
-                className="text-muted-foreground hover:text-gene-emerald hover:bg-gene-emerald/5 font-medium"
+                className="text-slate hover:text-olive hover:bg-beige/30 font-medium rounded-full px-5"
               >
                 Log In
               </Button>
             </Link>
             <Link href="/signup">
-              <Button className="bg-gene-emerald hover:bg-gene-emerald/90 text-gene-deep font-semibold px-6 shadow-lg shadow-gene-emerald/20 hover:shadow-gene-emerald/30 transition-all duration-300">
+              <Button className="rounded-full bg-olive text-cream font-semibold px-7 transition-colors duration-300 hover:bg-softgreen hover:text-slate">
                 Sign Up
               </Button>
             </Link>
@@ -83,7 +80,7 @@ export function Navbar() {
           {/* Mobile Menu Button */}
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="lg:hidden p-2 text-muted-foreground hover:text-gene-emerald transition-colors"
+            className="lg:hidden p-2 text-slate hover:text-olive transition-colors"
             aria-label="Toggle menu"
           >
             {mobileOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -99,7 +96,7 @@ export function Navbar() {
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3 }}
-            className="lg:hidden gene-glass border-t border-gene-emerald/10"
+            className="lg:hidden bg-background/95 backdrop-blur-sm border-t border-beige"
           >
             <div className="px-4 py-6 space-y-1">
               {navLinks.map((link) => (
@@ -107,19 +104,19 @@ export function Navbar() {
                   key={link.href}
                   href={link.href}
                   onClick={() => setMobileOpen(false)}
-                  className="block px-4 py-3 text-sm font-medium text-muted-foreground hover:text-gene-emerald hover:bg-gene-emerald/5 rounded-lg transition-all"
+                  className="block px-4 py-3 text-sm font-medium text-slate hover:text-olive hover:bg-beige/30 rounded-2xl transition-all"
                 >
                   {link.label}
                 </a>
               ))}
-              <div className="flex flex-col gap-2 pt-4 border-t border-gene-emerald/10">
+              <div className="flex flex-col gap-2 pt-4 border-t border-beige">
                 <Link href="/login" onClick={() => setMobileOpen(false)}>
-                  <Button variant="ghost" className="w-full justify-center text-muted-foreground hover:text-gene-emerald">
+                  <Button variant="ghost" className="w-full justify-center text-slate hover:text-olive rounded-full">
                     Log In
                   </Button>
                 </Link>
                 <Link href="/signup" onClick={() => setMobileOpen(false)}>
-                  <Button className="w-full bg-gene-emerald hover:bg-gene-emerald/90 text-gene-deep font-semibold">
+                  <Button className="w-full rounded-full bg-olive text-cream font-semibold hover:bg-softgreen hover:text-slate">
                     Sign Up
                   </Button>
                 </Link>

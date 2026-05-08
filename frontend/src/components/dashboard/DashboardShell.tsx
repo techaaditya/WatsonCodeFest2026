@@ -54,7 +54,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     <div className="flex flex-col h-full">
       {/* Logo */}
       <div className="flex items-center gap-2.5 px-4 h-16 shrink-0 border-b border-sidebar-border">
-        <Dna className="h-7 w-7 text-gene-emerald shrink-0" />
+        <Dna className="h-7 w-7 text-sidebar-foreground shrink-0" />
         <AnimatePresence>
           {!collapsed && (
             <motion.span
@@ -63,8 +63,8 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               exit={{ opacity: 0, width: 0 }}
               className="text-lg font-bold whitespace-nowrap overflow-hidden"
             >
-              <span className="text-foreground">Geno</span>
-              <span className="text-gene-emerald">Vault</span>
+              <span className="text-sidebar-foreground">Geno</span>
+              <span className="text-softgreen">Vault</span>
             </motion.span>
           )}
         </AnimatePresence>
@@ -79,20 +79,17 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               key={link.href}
               href={link.href}
               onClick={() => setMobileOpen(false)}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group relative ${
+              className={`flex items-center gap-3 px-3 py-2.5 text-sm font-medium transition-all duration-200 group ${
                 active
-                  ? "bg-gene-emerald/10 text-gene-emerald"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                  ? "bg-softgreen text-slate rounded-full"
+                  : "text-sidebar-foreground/90 hover:text-sidebar-foreground hover:bg-sidebar-accent rounded-2xl"
               }`}
             >
-              {active && (
-                <motion.div
-                  layoutId="sidebar-active"
-                  className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-6 bg-gene-emerald rounded-r-full"
-                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                />
-              )}
-              <link.icon className={`h-5 w-5 shrink-0 ${active ? "text-gene-emerald" : "group-hover:text-gene-emerald/70"}`} />
+              <link.icon
+                className={`h-5 w-5 shrink-0 ${
+                  active ? "text-slate" : "text-sidebar-foreground/90 group-hover:text-sidebar-foreground"
+                }`}
+              />
               <AnimatePresence>
                 {!collapsed && (
                   <motion.span
@@ -114,7 +111,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       <div className="hidden lg:block px-3 py-3 border-t border-sidebar-border">
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all w-full"
+          className="flex items-center gap-3 px-3 py-2 rounded-2xl text-sm text-sidebar-foreground/85 hover:text-sidebar-foreground hover:bg-sidebar-accent transition-all w-full"
         >
           <ChevronLeft className={`h-5 w-5 shrink-0 transition-transform duration-300 ${collapsed ? "rotate-180" : ""}`} />
           {!collapsed && <span className="whitespace-nowrap">Collapse</span>}
@@ -143,7 +140,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setMobileOpen(false)}
-              className="fixed inset-0 bg-black/60 z-40 lg:hidden"
+              className="fixed inset-0 bg-slate/35 z-40 lg:hidden"
             />
             <motion.aside
               initial={{ x: -280 }}
@@ -161,17 +158,17 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top Header */}
-        <header className="h-16 shrink-0 border-b border-border flex items-center justify-between px-4 sm:px-6 bg-background/80 backdrop-blur-sm">
+        <header className="h-16 shrink-0 border-b border-beige flex items-center justify-between px-4 sm:px-6 bg-background">
           <div className="flex items-center gap-3">
             <button
               onClick={() => setMobileOpen(true)}
-              className="lg:hidden p-2 text-muted-foreground hover:text-foreground transition-colors"
+              className="lg:hidden p-2 text-slate/80 hover:text-slate transition-colors"
               aria-label="Open menu"
             >
               <Menu className="h-5 w-5" />
             </button>
             <div className="hidden sm:block">
-              <h2 className="text-sm font-medium text-muted-foreground">
+              <h2 className="text-sm font-medium text-slate/80">
                 {sidebarLinks.find((l) => isActive(l.href))?.label || "Dashboard"}
               </h2>
             </div>
@@ -181,9 +178,9 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             <DropdownMenu>
               <DropdownMenuTrigger
                 render={
-                  <Button variant="ghost" className="flex items-center gap-2 px-2 hover:bg-muted/50">
-                    <Avatar className="h-8 w-8 border border-gene-emerald/20">
-                      <AvatarFallback className="bg-gene-emerald/10 text-gene-emerald text-sm font-semibold">
+                  <Button variant="ghost" className="flex items-center gap-2 px-2 hover:bg-beige/25 rounded-full">
+                    <Avatar className="h-8 w-8 border border-beige">
+                      <AvatarFallback className="bg-beige/30 text-olive text-sm font-semibold">
                         {userName.split(" ").map((n) => n[0]).join("").slice(0, 2)}
                       </AvatarFallback>
                     </Avatar>
@@ -191,7 +188,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                   </Button>
                 }
               />
-              <DropdownMenuContent align="end" className="w-48 gene-glass">
+              <DropdownMenuContent align="end" className="w-48 bg-white border border-beige rounded-2xl shadow-[0_18px_40px_rgba(45,58,35,0.10)]">
                 <DropdownMenuItem
                   render={
                     <Link href="/dashboard/profile" className="flex items-center gap-2 cursor-pointer">

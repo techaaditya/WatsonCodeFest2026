@@ -46,23 +46,23 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen px-4 py-10">
+    <div className="flex items-center justify-center min-h-screen px-4 py-10 bg-cream">
       <motion.div
         initial={{ opacity: 0, y: 30, scale: 0.95 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.6 }}
         className="w-full max-w-md"
       >
-        <div className="gene-card rounded-2xl p-8 sm:p-10">
+        <div className="rounded-3xl p-8 sm:p-10 bg-white border-2 border-beige shadow-[0_22px_60px_rgba(45,58,35,0.10)]">
           <div className="text-center mb-8">
             <Link href="/" className="inline-flex items-center gap-2 group">
-              <Dna className="h-8 w-8 text-gene-emerald transition-transform duration-500 group-hover:rotate-180" />
+              <Dna className="h-8 w-8 text-olive transition-transform duration-500 group-hover:rotate-180" />
               <span className="text-2xl font-bold">
-                <span className="text-foreground">Geno</span>
-                <span className="text-gene-emerald">Vault</span>
+                <span className="text-olive">Geno</span>
+                <span className="text-softgreen">Vault</span>
               </span>
             </Link>
-            <p className="mt-3 text-muted-foreground text-sm">
+            <p className="mt-3 text-slate/80 text-sm">
               Create your account to start predicting genetic outcomes.
             </p>
           </div>
@@ -71,30 +71,30 @@ export default function SignupPage() {
             <div className="space-y-2">
               <Label htmlFor="fullName">Full Name</Label>
               <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate/70" />
                 <Input id="fullName" placeholder="Your full name" value={fullName} onChange={(e) => setFullName(e.target.value)}
-                  className="pl-10 h-11 bg-background/50 border-border/50 focus:border-gene-emerald/50" required />
+                  className="pl-10 h-11 bg-cream border-beige focus:border-olive focus:ring-olive/20 text-slate" required />
               </div>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="email">Email Address</Label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate/70" />
                 <Input id="email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)}
-                  className="pl-10 h-11 bg-background/50 border-border/50 focus:border-gene-emerald/50" required />
+                  className="pl-10 h-11 bg-cream border-beige focus:border-olive focus:ring-olive/20 text-slate" required />
               </div>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate/70" />
                 <Input id="password" type={showPassword ? "text" : "password"} placeholder="••••••••" value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="pl-10 pr-10 h-11 bg-background/50 border-border/50 focus:border-gene-emerald/50" required />
+                  className="pl-10 pr-10 h-11 bg-cream border-beige focus:border-olive focus:ring-olive/20 text-slate" required />
                 <button type="button" onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate/70 hover:text-slate transition-colors">
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
@@ -103,10 +103,10 @@ export default function SignupPage() {
             <div className="space-y-2">
               <Label htmlFor="confirmPassword">Confirm Password</Label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate/70" />
                 <Input id="confirmPassword" type="password" placeholder="••••••••" value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="pl-10 h-11 bg-background/50 border-border/50 focus:border-gene-emerald/50" required />
+                  className="pl-10 h-11 bg-cream border-beige focus:border-olive focus:ring-olive/20 text-slate" required />
               </div>
             </div>
 
@@ -118,7 +118,7 @@ export default function SignupPage() {
             )}
 
             <Button type="submit" disabled={loading}
-              className="w-full h-11 bg-gene-emerald hover:bg-gene-emerald/90 text-gene-deep font-semibold shadow-lg shadow-gene-emerald/20 group">
+              className="w-full h-11 rounded-full bg-olive text-cream font-semibold transition-colors duration-300 hover:bg-softgreen hover:text-slate group">
               {loading ? (
                 <div className="flex items-center gap-2">
                   <div className="h-4 w-4 border-2 border-gene-deep/30 border-t-gene-deep rounded-full animate-spin" />
@@ -140,7 +140,7 @@ export default function SignupPage() {
             </div>
           </div>
 
-          <Button variant="outline" className="w-full h-11 border-border/50 hover:bg-gene-emerald/5 hover:border-gene-emerald/30"
+          <Button variant="outline" className="w-full h-11 rounded-full border-beige hover:bg-beige/25 text-slate"
             onClick={() => { mockAuth.setUser({ id: "g-user", email: "user@gmail.com", full_name: "Google User" }); router.push("/dashboard"); }}>
             <svg className="h-4 w-4 mr-2" viewBox="0 0 24 24">
               <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
@@ -151,9 +151,9 @@ export default function SignupPage() {
             Continue with Google
           </Button>
 
-          <p className="mt-6 text-center text-sm text-muted-foreground">
+          <p className="mt-6 text-center text-sm text-slate/80">
             Already have an account?{" "}
-            <Link href="/login" className="text-gene-emerald hover:text-gene-emerald/80 font-medium transition-colors">Sign In</Link>
+            <Link href="/login" className="text-olive hover:text-softgreen font-medium transition-colors">Sign In</Link>
           </p>
         </div>
       </motion.div>

@@ -37,21 +37,21 @@ export function DNABackground() {
       color: string;
     }[] = [];
 
+    // Organic palette (very subtle)
     const colors = [
-      "rgba(16, 185, 129,",  // emerald
-      "rgba(20, 184, 166,",  // teal
-      "rgba(245, 158, 11,",  // amber
-      "rgba(110, 231, 183,", // mint
+      "rgba(84, 107, 65,", // olive
+      "rgba(153, 173, 122,", // soft green
+      "rgba(220, 204, 172,", // beige
     ];
 
-    for (let i = 0; i < 60; i++) {
+    for (let i = 0; i < 36; i++) {
       particles.push({
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height,
         vx: (Math.random() - 0.5) * 0.3,
         vy: (Math.random() - 0.5) * 0.3,
         size: Math.random() * 2.5 + 0.5,
-        opacity: Math.random() * 0.4 + 0.1,
+        opacity: Math.random() * 0.18 + 0.04,
         color: colors[Math.floor(Math.random() * colors.length)],
       });
     }
@@ -79,9 +79,9 @@ export function DNABackground() {
           ctx.moveTo(x1, y);
           ctx.lineTo(x2, y);
           const gradient = ctx.createLinearGradient(x1, y, x2, y);
-          gradient.addColorStop(0, `rgba(16, 185, 129, ${0.08 * alpha * depth1})`);
-          gradient.addColorStop(0.5, `rgba(245, 158, 11, ${0.05 * alpha})`);
-          gradient.addColorStop(1, `rgba(20, 184, 166, ${0.08 * alpha * depth2})`);
+          gradient.addColorStop(0, `rgba(84, 107, 65, ${0.06 * alpha * depth1})`);
+          gradient.addColorStop(0.5, `rgba(220, 204, 172, ${0.06 * alpha})`);
+          gradient.addColorStop(1, `rgba(153, 173, 122, ${0.06 * alpha * depth2})`);
           ctx.strokeStyle = gradient;
           ctx.lineWidth = 1;
           ctx.stroke();
@@ -93,12 +93,12 @@ export function DNABackground() {
 
         ctx.beginPath();
         ctx.arc(x1, y, nodeSize1, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(16, 185, 129, ${0.15 * alpha * depth1 + 0.05})`;
+        ctx.fillStyle = `rgba(84, 107, 65, ${0.12 * alpha * depth1 + 0.03})`;
         ctx.fill();
 
         ctx.beginPath();
         ctx.arc(x2, y, nodeSize2, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(20, 184, 166, ${0.15 * alpha * depth2 + 0.05})`;
+        ctx.fillStyle = `rgba(153, 173, 122, ${0.12 * alpha * depth2 + 0.03})`;
         ctx.fill();
       }
     };
@@ -119,22 +119,7 @@ export function DNABackground() {
         ctx.fill();
       });
 
-      // Draw particle connections
-      for (let i = 0; i < particles.length; i++) {
-        for (let j = i + 1; j < particles.length; j++) {
-          const dx = particles[i].x - particles[j].x;
-          const dy = particles[i].y - particles[j].y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 120) {
-            ctx.beginPath();
-            ctx.moveTo(particles[i].x, particles[i].y);
-            ctx.lineTo(particles[j].x, particles[j].y);
-            ctx.strokeStyle = `rgba(16, 185, 129, ${0.04 * (1 - dist / 120)})`;
-            ctx.lineWidth = 0.5;
-            ctx.stroke();
-          }
-        }
-      }
+      // Intentionally no particle connections (avoid tech-grid feel)
 
       // Draw multiple DNA helixes
       const positions = [
@@ -164,7 +149,7 @@ export function DNABackground() {
     <canvas
       ref={canvasRef}
       className="fixed inset-0 pointer-events-none z-0"
-      style={{ opacity: 0.8 }}
+      style={{ opacity: 0.38 }}
     />
   );
 }

@@ -11,8 +11,8 @@ export function HeroSection() {
       id="home"
       className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20"
     >
-      {/* Radial gradient overlays */}
-      <div className="absolute inset-0 dna-bg-pattern" />
+      {/* Extremely subtle texture overlay */}
+      <div className="absolute inset-0 opacity-40 dna-bg-pattern" />
 
       <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         {/* Badge */}
@@ -20,10 +20,10 @@ export function HeroSection() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.6 }}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-full gene-border-glow bg-gene-emerald/5 mb-8"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-beige bg-cream/70 mb-8"
         >
-          <Sparkles className="h-4 w-4 text-gene-amber" />
-          <span className="text-sm font-medium text-gene-mint">
+          <Sparkles className="h-4 w-4 text-softgreen" />
+          <span className="text-sm font-medium text-slate">
             Genomic Architecture of Disease
           </span>
         </motion.div>
@@ -35,7 +35,7 @@ export function HeroSection() {
           transition={{ delay: 0.4, duration: 0.7 }}
           className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight leading-tight"
         >
-          <span className="text-foreground">Decode Your</span>
+          <span className="text-olive">Decode Your</span>
           <br />
           <span className="gene-gradient-text">Genetic Legacy</span>
         </motion.h1>
@@ -45,7 +45,7 @@ export function HeroSection() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6, duration: 0.6 }}
-          className="mt-6 max-w-2xl mx-auto text-lg sm:text-xl text-muted-foreground leading-relaxed"
+          className="mt-6 max-w-2xl mx-auto text-lg sm:text-xl text-slate/90 leading-relaxed"
         >
           Predict inherited disease risks, carrier status, and genetic traits
           using advanced probabilistic models and Monogenic Risk Scores — built
@@ -62,7 +62,7 @@ export function HeroSection() {
           <Link href="/signup">
             <Button
               size="lg"
-              className="bg-gene-emerald hover:bg-gene-emerald/90 text-gene-deep font-semibold px-8 h-12 text-base shadow-xl shadow-gene-emerald/20 hover:shadow-gene-emerald/30 transition-all duration-300 group"
+              className="rounded-full bg-olive text-cream font-semibold px-8 h-12 text-base transition-colors duration-300 hover:bg-softgreen hover:text-slate group"
             >
               Get Started
               <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
@@ -72,7 +72,7 @@ export function HeroSection() {
             <Button
               size="lg"
               variant="outline"
-              className="border-gene-emerald/30 text-gene-emerald hover:bg-gene-emerald/5 hover:border-gene-emerald/50 px-8 h-12 text-base transition-all duration-300"
+              className="rounded-full border-beige text-olive hover:bg-beige/25 hover:border-beige px-8 h-12 text-base transition-all duration-300"
             >
               Learn More
             </Button>
@@ -92,10 +92,10 @@ export function HeroSection() {
             { value: "99%", label: "Prediction Accuracy" },
           ].map((stat, i) => (
             <div key={i} className="text-center">
-              <div className="text-2xl sm:text-3xl font-bold text-gene-emerald">
+              <div className="text-2xl sm:text-3xl font-bold text-olive">
                 {stat.value}
               </div>
-              <div className="text-xs sm:text-sm text-muted-foreground mt-1">
+              <div className="text-xs sm:text-sm text-slate/80 mt-1">
                 {stat.label}
               </div>
             </div>

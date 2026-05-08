@@ -41,24 +41,24 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen px-4">
+    <div className="flex items-center justify-center min-h-screen px-4 bg-cream">
       <motion.div
         initial={{ opacity: 0, y: 30, scale: 0.95 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.6, ease: "easeOut" }}
         className="w-full max-w-md"
       >
-        <div className="gene-card rounded-2xl p-8 sm:p-10">
+        <div className="rounded-3xl p-8 sm:p-10 bg-white border-2 border-beige shadow-[0_22px_60px_rgba(45,58,35,0.10)]">
           {/* Logo */}
           <div className="text-center mb-8">
             <Link href="/" className="inline-flex items-center gap-2 group">
-              <Dna className="h-8 w-8 text-gene-emerald transition-transform duration-500 group-hover:rotate-180" />
+              <Dna className="h-8 w-8 text-olive transition-transform duration-500 group-hover:rotate-180" />
               <span className="text-2xl font-bold">
-                <span className="text-foreground">Geno</span>
-                <span className="text-gene-emerald">Vault</span>
+                <span className="text-olive">Geno</span>
+                <span className="text-softgreen">Vault</span>
               </span>
             </Link>
-            <p className="mt-3 text-muted-foreground text-sm">
+            <p className="mt-3 text-slate/80 text-sm">
               Welcome back. Sign in to continue your analysis.
             </p>
           </div>
@@ -70,14 +70,14 @@ export default function LoginPage() {
                 Email Address
               </Label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate/70" />
                 <Input
                   id="email"
                   type="email"
                   placeholder="you@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="pl-10 h-11 bg-background/50 border-border/50 focus:border-gene-emerald/50 focus:ring-gene-emerald/20"
+                  className="pl-10 h-11 bg-cream border-beige focus:border-olive focus:ring-olive/20 text-slate"
                   required
                 />
               </div>
@@ -88,20 +88,20 @@ export default function LoginPage() {
                 Password
               </Label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate/70" />
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="pl-10 pr-10 h-11 bg-background/50 border-border/50 focus:border-gene-emerald/50 focus:ring-gene-emerald/20"
+                  className="pl-10 pr-10 h-11 bg-cream border-beige focus:border-olive focus:ring-olive/20 text-slate"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate/70 hover:text-slate transition-colors"
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
@@ -121,7 +121,7 @@ export default function LoginPage() {
             <Button
               type="submit"
               disabled={loading}
-              className="w-full h-11 bg-gene-emerald hover:bg-gene-emerald/90 text-gene-deep font-semibold shadow-lg shadow-gene-emerald/20 transition-all duration-300 group"
+              className="w-full h-11 rounded-full bg-olive text-cream font-semibold transition-colors duration-300 hover:bg-softgreen hover:text-slate group"
             >
               {loading ? (
                 <div className="flex items-center gap-2">
@@ -150,7 +150,7 @@ export default function LoginPage() {
           {/* Google OAuth */}
           <Button
             variant="outline"
-            className="w-full h-11 border-border/50 hover:bg-gene-emerald/5 hover:border-gene-emerald/30 transition-all duration-300"
+            className="w-full h-11 rounded-full border-beige hover:bg-beige/25 transition-all duration-300 text-slate"
             onClick={() => {
               mockAuth.setUser({ id: "google-user", email: "user@gmail.com", full_name: "Google User" });
               router.push("/dashboard");
@@ -168,7 +168,7 @@ export default function LoginPage() {
           {/* Sign up link */}
           <p className="mt-6 text-center text-sm text-muted-foreground">
             Don&apos;t have an account?{" "}
-            <Link href="/signup" className="text-gene-emerald hover:text-gene-emerald/80 font-medium transition-colors">
+            <Link href="/signup" className="text-olive hover:text-softgreen font-medium transition-colors">
               Sign Up
             </Link>
           </p>
