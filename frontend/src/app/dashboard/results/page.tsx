@@ -74,7 +74,7 @@ export default function ResultsPage() {
             <FlaskConical className="h-6 w-6 text-gene-emerald" /> Prediction Results
           </h1>
           <p className="text-sm text-muted-foreground mt-0.5">
-            {input.mode === "dual" ? "Dual Parent" : "Single Parent"} Analysis Complete
+            {input.mode === "dual" ? "Parent Compatible" : "Individual"} Analysis Complete
           </p>
         </div>
       </motion.div>

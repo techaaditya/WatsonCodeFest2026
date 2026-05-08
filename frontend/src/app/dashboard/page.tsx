@@ -40,7 +40,7 @@ export default function PredictionLabPage() {
 
       {/* Two Main Cards */}
       <div className="grid md:grid-cols-2 gap-6">
-        {/* Dual Parent Analysis */}
+        {/* Parent Compatible Analysis */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -66,7 +66,7 @@ export default function PredictionLabPage() {
             </div>
           </div>
 
-          <h3 className="text-xl font-semibold text-center mb-2">Dual Parent Analysis</h3>
+          <h3 className="text-xl font-semibold text-center mb-2">Parent Compatible Analysis</h3>
           <p className="text-sm text-muted-foreground text-center leading-relaxed mb-6">
             Both parents provide their genetic data for comprehensive offspring prediction including disease risk, carrier status, and inheritance patterns.
           </p>
@@ -77,7 +77,7 @@ export default function PredictionLabPage() {
           </div>
         </motion.div>
 
-        {/* Single Parent Analysis */}
+        {/* Individual Analysis */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -96,7 +96,7 @@ export default function PredictionLabPage() {
             </div>
           </div>
 
-          <h3 className="text-xl font-semibold text-center mb-2">Single Parent Analysis</h3>
+          <h3 className="text-xl font-semibold text-center mb-2">Individual Analysis</h3>
           <p className="text-sm text-muted-foreground text-center leading-relaxed mb-6">
             One parent provides genetic data for carrier screening, mutation detection, and individual risk assessment based on known genotypes.
           </p>
@@ -147,7 +147,7 @@ export default function PredictionLabPage() {
         </div>
         <div className="grid sm:grid-cols-3 gap-4">
           {[
-            { step: "1", title: "Choose Mode", desc: "Select dual or single parent analysis above." },
+            { step: "1", title: "Choose Mode", desc: "Select parent compatible or individual analysis above." },
             { step: "2", title: "Input Genotypes", desc: "Enter parental genotypes for each disease gene." },
             { step: "3", title: "View Results", desc: "Get comprehensive risk scores and predictions." },
           ].map((item, i) => (

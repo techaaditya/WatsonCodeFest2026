@@ -7,7 +7,7 @@ const features = [
   {
     icon: FlaskConical,
     title: "Prediction Lab",
-    description: "Dual and single-parent genetic analysis with Punnett square visualization, disease risk scoring, blood group prediction, and immunity assessment.",
+    description: "Parent compatible and individual genetic analysis with Punnett square visualization, disease risk scoring, blood group prediction, and immunity assessment.",
     color: "#10b981",
     bgGlow: "rgba(16, 185, 129, 0.08)",
   },

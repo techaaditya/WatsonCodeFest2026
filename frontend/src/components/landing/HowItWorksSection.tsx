@@ -9,7 +9,7 @@ const steps = [
     step: "01",
     title: "Input Gene Data",
     description:
-      "Select parental genotypes for key monogenic diseases. Choose from dual-parent or single-parent analysis modes.",
+      "Select parental genotypes for key monogenic diseases. Choose from parent compatible or individual analysis modes.",
     color: "text-gene-emerald",
     glowColor: "rgba(16, 185, 129, 0.15)",
   },
