@@ -38,14 +38,32 @@ export const api = {
   },
   
   genoguide: {
-    async chat(message: string, mode: string = "general") {
-      const response = await fetch(`${API_BASE_URL}/genoguide/chat?mode=${mode}`, {
+    async chat(message: string, mode: string = "general", attachment?: File | null) {
+      const form = new FormData();
+      form.append("message", message);
+      form.append("mode", mode);
+      if (attachment) form.append("attachment", attachment);
+
+      const response = await fetch(`${API_BASE_URL}/genoguide/chat`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message }),
+        body: form,
       });
       if (!response.ok) throw new Error("Chat failed");
       return await response.json();
+    },
+
+    async chatStream(message: string, mode: string = "general", attachment?: File | null) {
+      const form = new FormData();
+      form.append("message", message);
+      form.append("mode", mode);
+      if (attachment) form.append("attachment", attachment);
+
+      const response = await fetch(`${API_BASE_URL}/genoguide/chat/stream`, {
+        method: "POST",
+        body: form,
+      });
+      if (!response.ok || !response.body) throw new Error("Streaming chat failed");
+      return response;
     }
   }
 };
