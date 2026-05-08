@@ -1,5 +1,6 @@
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 from fastapi.responses import StreamingResponse
+import json
 from app.services.ai_counselor import extract_pdf_text, generate_counselor_response, stream_counselor_response
 
 router = APIRouter()
@@ -17,7 +18,11 @@ async def chat(
         content = await attachment.read()
         pdf_text = extract_pdf_text(content)
     response = await generate_counselor_response(message=message, mode=mode, pdf_text=pdf_text)
-    return {"response": response}
+    try:
+        parsed = json.loads(response)
+    except json.JSONDecodeError:
+        parsed = {"thought": "", "response": response}
+    return parsed
 
 
 @router.post("/chat/stream")

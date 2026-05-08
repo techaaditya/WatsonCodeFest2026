@@ -2,17 +2,29 @@
 
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Bot, Send, User, Sparkles, Dna, Loader2, Paperclip, X } from "lucide-react";
+import { Bot, Send, User, Loader2, Paperclip, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api } from "@/services/api";
+
+/** Failsafe: if tags leaked into the streamed response buffer, split client-side. */
+function splitMessageTags(thought: string, response: string): { thought: string; response: string } {
+  const raw = `${thought || ""}\n${response || ""}`;
+  const th = raw.match(/\[THOUGHT\]([\s\S]*?)\[\/THOUGHT\]/i);
+  const rs = raw.match(/\[RESPONSE\]([\s\S]*?)\[\/RESPONSE\]/i);
+  if (!th && !rs) return { thought: thought || "", response: response || "" };
+  return {
+    thought: th ? th[1].trim() : thought || "",
+    response: rs ? rs[1].trim() : (response || "").replace(/\[THOUGHT\][\s\S]*?\[\/THOUGHT\]/gi, "").trim(),
+  };
+}
 
 interface Message {
   id: string;
   role: "user" | "assistant";
-  content: string;
+  content?: string;
+  thought?: string;
+  response?: string;
   timestamp: Date;
 }
 
@@ -32,14 +44,13 @@ export default function GenoGuidePage() {
     {
       id: "welcome",
       role: "assistant",
-      content:
+      response:
         "Welcome to **GenoGuide**.\n\nThis is a clinical explainer to help you understand genetic diseases, inheritance patterns, and carrier risks.\n\nChoose a suggested topic below or type your question.",
       timestamp: new Date(),
     },
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [mode, setMode] = useState<"general" | "specific">("general");
   const scrollRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -56,13 +67,14 @@ export default function GenoGuidePage() {
     setInput("");
     setLoading(true);
     const assistantId = (Date.now() + 1).toString();
-    setMessages((prev) => [...prev, { id: assistantId, role: "assistant", content: "", timestamp: new Date() }]);
+    setMessages((prev) => [...prev, { id: assistantId, role: "assistant", thought: "", response: "", timestamp: new Date() }]);
 
     try {
-      const streamResponse = await api.genoguide.chatStream(text, mode, attachment);
+      const streamResponse = await api.genoguide.chatStream(text, "general", attachment);
       const reader = streamResponse.body?.getReader();
       const decoder = new TextDecoder();
       let buffer = "";
+      let firstTokenReceived = false;
 
       if (!reader) throw new Error("No stream reader available");
 
@@ -78,9 +90,21 @@ export default function GenoGuidePage() {
           if (!trimmed) continue;
           try {
             const parsed = JSON.parse(trimmed);
-            if (parsed.delta) {
+            if (parsed.thought_delta || parsed.response_delta) {
+              if (!firstTokenReceived) {
+                firstTokenReceived = true;
+                setLoading(false);
+              }
               setMessages((prev) =>
-                prev.map((m) => (m.id === assistantId ? { ...m, content: m.content + parsed.delta } : m))
+                prev.map((m) =>
+                  m.id === assistantId
+                    ? {
+                        ...m,
+                        thought: (m.thought || "") + (parsed.thought_delta || ""),
+                        response: (m.response || "") + (parsed.response_delta || ""),
+                      }
+                    : m
+                )
               );
             }
           } catch {
@@ -88,10 +112,24 @@ export default function GenoGuidePage() {
           }
         }
       }
+
+      setMessages((prev) =>
+        prev.map((m) => {
+          if (m.id !== assistantId || m.role !== "assistant") return m;
+          const split = splitMessageTags(m.thought || "", m.response || "");
+          return { ...m, thought: split.thought, response: split.response };
+        })
+      );
     } catch (error) {
+      setLoading(false);
       setMessages((prev) =>
         prev.map((m) =>
-          m.id === assistantId ? { ...m, content: "I could not reach the local GenoGuide model. Please ensure Ollama is running with medgemma1.5:4b." } : m
+          m.id === assistantId
+            ? {
+                ...m,
+                response: "I could not reach the local GenoGuide model. Please ensure Ollama is running with medgemma1.5:4b.",
+              }
+            : m
         )
       );
     } finally {
@@ -111,16 +149,6 @@ export default function GenoGuidePage() {
             </h1>
             <p className="text-sm text-slate/80 mt-0.5">Genetic counseling, explained clearly.</p>
           </div>
-          <Tabs value={mode} onValueChange={(v) => setMode(v as "general" | "specific")}>
-            <TabsList className="bg-cream border border-beige rounded-full p-1">
-              <TabsTrigger value="general" className="rounded-full text-xs data-[state=active]:bg-olive data-[state=active]:text-cream text-slate">
-                <Sparkles className="h-3 w-3 mr-1" /> General
-              </TabsTrigger>
-              <TabsTrigger value="specific" className="rounded-full text-xs data-[state=active]:bg-olive data-[state=active]:text-cream text-slate">
-                <Dna className="h-3 w-3 mr-1" /> Get Specific
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
         </div>
       </motion.div>
 
@@ -141,16 +169,71 @@ export default function GenoGuidePage() {
                       <Bot className="h-4 w-4 text-olive" />
                     </div>
                   )}
-                  <div className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
-                    msg.role === "user" ? "chat-bubble-user" : "chat-bubble-ai"
-                  }`}>
-                    <div className="whitespace-pre-wrap" dangerouslySetInnerHTML={{
-                      __html: msg.content
-                        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                        .replace(/\n/g, '<br/>')
-                        .replace(/```([\s\S]*?)```/g, '<pre class="bg-cream rounded-2xl border border-beige p-3 mt-2 mb-2 text-xs font-mono overflow-x-auto">$1</pre>')
-                    }} />
-                  </div>
+                  {msg.role === "user" ? (
+                    <div className="max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-relaxed chat-bubble-user">
+                      <div
+                        className="whitespace-pre-wrap"
+                        dangerouslySetInnerHTML={{
+                          __html: (msg.content || "")
+                            .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+                            .replace(/\n/g, "<br/>")
+                            .replace(
+                              /```([\s\S]*?)```/g,
+                              '<pre class="bg-cream rounded-2xl border border-beige p-3 mt-2 mb-2 text-xs font-mono overflow-x-auto">$1</pre>'
+                            ),
+                        }}
+                      />
+                    </div>
+                  ) : (
+                    <div className="flex flex-col gap-3 my-4 max-w-[85%] min-w-0 flex-1">
+                      {loading && msg.id === messages[messages.length - 1]?.id && !msg.thought && !msg.response && !msg.content ? (
+                        <div className="chat-bubble-ai rounded-2xl px-4 py-3 flex items-center gap-2 text-sm text-slate/80 w-max">
+                          <Loader2 className="h-4 w-4 animate-spin" /> Formulating guidance…
+                        </div>
+                      ) : null}
+                      
+                      {msg.content && !msg.thought && !msg.response ? (
+                         <div className="bg-white border border-blue-100 shadow-sm rounded-lg p-4 mx-2">
+                           <div
+                             className="text-base text-slate-800 leading-relaxed whitespace-pre-wrap"
+                             dangerouslySetInnerHTML={{
+                               __html: (msg.content || "")
+                                 .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+                                 .replace(/\n/g, "<br/>")
+                                 .replace(
+                                   /```([\s\S]*?)```/g,
+                                   '<pre class="bg-slate-50 rounded-lg border border-slate-200 p-3 mt-2 mb-2 text-xs font-mono overflow-x-auto">$1</pre>'
+                                 ),
+                             }}
+                           />
+                         </div>
+                      ) : null}
+
+                      {msg.thought ? (
+                        <div className="bg-slate-100 border border-slate-200 rounded-lg p-4 mx-2">
+                          <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">🧠 Internal Reasoning</h4>
+                          <p className="text-sm text-slate-600 font-mono italic whitespace-pre-wrap">{msg.thought}</p>
+                        </div>
+                      ) : null}
+                      {msg.response ? (
+                        <div className="bg-white border border-blue-100 shadow-sm rounded-lg p-4 mx-2">
+                          <h4 className="text-[10px] font-bold text-blue-600 uppercase tracking-wider mb-2">💡 Clinical Counsel</h4>
+                          <div
+                            className="text-base text-slate-800 leading-relaxed whitespace-pre-wrap"
+                            dangerouslySetInnerHTML={{
+                              __html: (msg.response || "")
+                                .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+                                .replace(/\n/g, "<br/>")
+                                .replace(
+                                  /```([\s\S]*?)```/g,
+                                  '<pre class="bg-slate-50 rounded-lg border border-slate-200 p-3 mt-2 mb-2 text-xs font-mono overflow-x-auto">$1</pre>'
+                                ),
+                            }}
+                          />
+                        </div>
+                      ) : null}
+                    </div>
+                  )}
                   {msg.role === "user" && (
                     <div className="w-8 h-8 rounded-full bg-softgreen/25 border border-softgreen/40 flex items-center justify-center shrink-0 mt-1">
                       <User className="h-4 w-4 text-slate" />
@@ -159,16 +242,6 @@ export default function GenoGuidePage() {
                 </motion.div>
               ))}
             </AnimatePresence>
-            {loading && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex gap-3">
-                <div className="w-8 h-8 rounded-full bg-white border border-beige flex items-center justify-center shrink-0">
-                  <Bot className="h-4 w-4 text-olive" />
-                </div>
-                <div className="chat-bubble-ai rounded-2xl px-4 py-3 flex items-center gap-2 text-sm text-slate/80">
-                  <Loader2 className="h-4 w-4 animate-spin" /> Formulating guidance…
-                </div>
-              </motion.div>
-            )}
             <div ref={messagesEndRef} />
           </div>
         </div>
@@ -177,7 +250,7 @@ export default function GenoGuidePage() {
         {messages.length <= 2 && (
           <div className="px-4 pb-3 flex flex-wrap gap-2">
             {suggestions.slice(0, 4).map((s, i) => (
-              <button key={i} onClick={() => sendMessage(s)}
+              <button key={i} onClick={() => void sendMessage(s)}
                 className="px-3 py-1.5 rounded-full text-xs border border-beige text-olive hover:bg-beige/25 transition-all">
                 {s}
               </button>
@@ -227,7 +300,7 @@ export default function GenoGuidePage() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); void sendMessage(input); } }}
-              placeholder={mode === "general" ? "Ask about genetics..." : "Ask about a specific gene or disease..."}
+              placeholder="Ask about genetics..."
               className="min-h-[44px] max-h-[120px] resize-none bg-cream border-beige focus:border-olive text-slate rounded-2xl"
               rows={1}
             />
