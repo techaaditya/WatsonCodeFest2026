@@ -330,3 +330,22 @@ h1, h2, h3, h4 {
   color: #2d3a23;
   border: 1px solid #dcccac;
 }
+
+/* ======= PRINT STYLES FOR REPORTS ======= */
+@media print {
+  body {
+    background: white;
+    color: black;
+  }
+  button, nav, .print-hidden, [role="tablist"], .sidebar {
+    display: none !important;
+  }
+  .gene-card {
+    box-shadow: none !important;
+    border: 1px solid #ddd !important;
+    page-break-inside: avoid;
+  }
+  h1, h2, h3, h4, h5 {
+    page-break-after: avoid;
+  }
+}

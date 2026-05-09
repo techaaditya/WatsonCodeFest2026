@@ -137,7 +137,7 @@ export function DualParentInput({ mode, onPredict, isLoading }: DualParentInputP
         >
           <span className="absolute inset-[-1000%] animate-[spin_5s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#546B41_0%,#99AD7A_50%,#DCCCAC_100%)]" />
           <span className="inline-flex h-full w-full cursor-pointer items-center justify-center rounded-full bg-olive px-8 py-1 text-lg font-bold text-cream transition-colors hover:bg-softgreen hover:text-slate">
-            {isLoading ? "Analyzing Sequence..." : "Predict & Analyze"}
+            {isLoading ? "Analyzing..." : "Analyze Genomic Data"}
           </span>
         </button>
       </div>

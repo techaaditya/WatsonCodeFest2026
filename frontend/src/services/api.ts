@@ -30,6 +30,34 @@ export const api = {
       }
     },
     
+    async predictSickleCell(data: any) {
+      try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 45000);
+        const response = await fetch(`${API_BASE_URL}/prediction/predict/sickle-cell`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+          signal: controller.signal,
+        });
+        clearTimeout(timeout);
+        
+        if (!response.ok) {
+          throw new Error("Failed to fetch prediction results");
+        }
+        
+        return await response.json();
+      } catch (error) {
+        console.error("API Error (prediction/predict/sickle-cell):", error);
+        if (error instanceof Error && error.name === "AbortError") {
+          throw new Error("Prediction request timed out. Please try again.");
+        }
+        throw error;
+      }
+    },
+    
     async getDiseases() {
       const response = await fetch(`${API_BASE_URL}/prediction/diseases`);
       if (!response.ok) throw new Error("Failed to fetch diseases");

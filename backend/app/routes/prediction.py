@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from app.services.genetics.engine import PredictionInput, run_prediction
+from app.services.genetics.sickle_cell_ml import analyze_sickle_cell
 
 router = APIRouter()
 
@@ -7,6 +8,19 @@ router = APIRouter()
 async def predict_genetic_outcome(data: PredictionInput):
     try:
         result = run_prediction(data)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/predict/sickle-cell")
+async def predict_sickle_cell(data: PredictionInput):
+    try:
+        result = analyze_sickle_cell(
+            mode=data.mode,
+            sequence=data.sequence,
+            father_sequence=data.father_sequence,
+            mother_sequence=data.mother_sequence
+        )
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
