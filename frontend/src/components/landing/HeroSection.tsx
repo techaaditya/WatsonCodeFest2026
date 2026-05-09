@@ -48,7 +48,7 @@ export function HeroSection() {
           className="mt-6 max-w-2xl mx-auto text-lg sm:text-xl text-slate/90 leading-relaxed"
         >
           Predict inherited disease risks, carrier status, and genetic traits
-          using advanced probabilistic models and Monogenic Risk Scores — built
+          using advanced probabilistic models and Monogenic Risk Scores - built
           for Nepal&apos;s genomic future.
         </motion.p>
 

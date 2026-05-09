@@ -53,7 +53,7 @@ export function HowItWorksSection() {
             <span className="gene-gradient-text">Genetic Clarity</span>
           </h2>
           <p className="mt-4 text-muted-foreground text-lg">
-            From gene input to comprehensive prediction — a streamlined workflow
+            From gene input to comprehensive prediction - a streamlined workflow
             designed for simplicity and scientific rigor.
           </p>
         </motion.div>

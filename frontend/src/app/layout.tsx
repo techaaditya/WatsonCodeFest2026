@@ -11,7 +11,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "DNADristi — Decode Your Legacy",
+  title: "DNADristi - Decode Your Legacy",
   description:
     "DNADristi is an advanced genomic disease prediction platform that uses probabilistic models and Monogenic Risk Scores to predict inherited disease risks, carrier status, and genetic traits.",
   keywords: [

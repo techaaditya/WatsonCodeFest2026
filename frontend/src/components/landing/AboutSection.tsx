@@ -60,7 +60,7 @@ export function AboutSection() {
                 icon: Shield,
                 title: "Carrier Detection",
                 description:
-                  "Identify silent carriers of recessive genetic disorders — critical for communities with high consanguinity rates and limited screening.",
+                  "Identify silent carriers of recessive genetic disorders - critical for communities with high consanguinity rates and limited screening.",
                 color: "text-gene-teal",
                 bg: "bg-gene-teal/10",
                 border: "border-gene-teal/20",

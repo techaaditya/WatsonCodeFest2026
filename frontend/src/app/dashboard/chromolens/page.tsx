@@ -32,7 +32,7 @@ export default function HelixVisionPage() {
           <Microscope className="h-6 w-6 text-gene-teal" /> HelixVision
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Interactive chromosome browser — click any chromosome to view details and gene mutations.
+          Interactive chromosome browser - click any chromosome to view details and gene mutations.
         </p>
       </motion.div>
 

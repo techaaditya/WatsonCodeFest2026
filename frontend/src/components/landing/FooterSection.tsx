@@ -35,7 +35,7 @@ export function FooterSection() {
                 Built by <span className="text-olive">GeneForge</span>
               </h2>
               <p className="text-slate/80 text-sm sm:text-base max-w-lg mx-auto">
-                Watson CodeFest 2026 — Pioneering accessible genomic tools for Nepal.
+                Watson CodeFest 2026 - Pioneering accessible genomic tools for Nepal.
               </p>
             </div>
           </div>
