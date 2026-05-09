@@ -255,7 +255,7 @@ export default function AcademyPage() {
         className="fixed bottom-8 right-8 z-40 bg-olive text-white shadow-xl rounded-full px-5 py-3 flex items-center gap-2 font-medium hover:bg-olive/90 transition-colors"
       >
         <MessageCircleQuestion className="h-5 w-5" />
-        Got questions? Ask GenoGuide
+        Got questions? Ask Genie
       </motion.button>
 
       {/* Module Modal */}

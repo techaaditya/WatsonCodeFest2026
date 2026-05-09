@@ -467,7 +467,7 @@ export default function ResultsPage() {
         </Button>
         <Button onClick={() => router.push("/dashboard/chromolens")}
           className="bg-gene-emerald hover:bg-gene-emerald/90 text-gene-deep font-semibold">
-          View in ChromoLens
+          View in HelixVision
         </Button>
       </motion.div>
     </div>

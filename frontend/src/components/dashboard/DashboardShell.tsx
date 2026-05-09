@@ -18,10 +18,10 @@ import { createClient } from "@/utils/supabase/client";
 
 const sidebarLinks = [
   { icon: FlaskConical, label: "Prediction Lab", href: "/dashboard" },
-  { icon: Microscope, label: "ChromoLens", href: "/dashboard/chromolens" },
-  { icon: Bot, label: "GenoGuide", href: "/dashboard/genoguide" },
+  { icon: Microscope, label: "HelixVision", href: "/dashboard/chromolens" },
+  { icon: Bot, label: "Genie", href: "/dashboard/genoguide" },
   { icon: GraduationCap, label: "Gene Academy", href: "/dashboard/academy" },
-  { icon: MapPin, label: "Heritage Mapper", href: "/dashboard/heritage" },
+  { icon: MapPin, label: "LineageLink", href: "/dashboard/heritage" },
 ];
 
 export function DashboardShell({ children }: { children: React.ReactNode }) {
@@ -68,8 +68,8 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               exit={{ opacity: 0, width: 0 }}
               className="text-lg font-bold whitespace-nowrap overflow-hidden"
             >
-              <span className="text-sidebar-foreground">Geno</span>
-              <span className="text-softgreen">Vault</span>
+              <span className="text-sidebar-foreground">DNA</span>
+              <span className="text-softgreen">Dristi</span>
             </motion.span>
           )}
         </AnimatePresence>
@@ -116,10 +116,9 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       <div className="hidden lg:block px-3 py-3 border-t border-sidebar-border">
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="flex items-center gap-3 px-3 py-2 rounded-2xl text-sm text-sidebar-foreground/85 hover:text-sidebar-foreground hover:bg-sidebar-accent transition-all w-full"
+          className={`flex items-center ${collapsed ? 'justify-center' : 'justify-start px-3'} gap-3 py-2 rounded-2xl text-sidebar-foreground/85 hover:text-sidebar-foreground hover:bg-sidebar-accent transition-all w-full`}
         >
           <ChevronLeft className={`h-5 w-5 shrink-0 transition-transform duration-300 ${collapsed ? "rotate-180" : ""}`} />
-          {!collapsed && <span className="whitespace-nowrap">Collapse</span>}
         </button>
       </div>
     </div>

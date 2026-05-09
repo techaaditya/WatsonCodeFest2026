@@ -22,14 +22,14 @@ const chromosomeData = [
   { num: "Y", size: 24, genes: 63, highlight: true, disease: "Y-Chromosome Infertility", gene: "AZF", position: "Yq11" },
 ];
 
-export default function ChromoLensPage() {
+export default function HelixVisionPage() {
   const [selected, setSelected] = useState<typeof chromosomeData[0] | null>(null);
 
   return (
     <div className="max-w-6xl mx-auto space-y-8">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
         <h1 className="text-2xl font-bold flex items-center gap-2">
-          <Microscope className="h-6 w-6 text-gene-teal" /> ChromoLens
+          <Microscope className="h-6 w-6 text-gene-teal" /> HelixVision
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
           Interactive chromosome browser — click any chromosome to view details and gene mutations.

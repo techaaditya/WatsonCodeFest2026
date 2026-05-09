@@ -96,7 +96,7 @@ export default function HeritagePage() {
     <div className="max-w-5xl mx-auto space-y-6">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
         <h1 className="text-2xl font-bold flex items-center gap-2">
-          <MapPin className="h-6 w-6 text-gene-coral" /> Heritage Mapper
+          <MapPin className="h-6 w-6 text-gene-coral" /> LineageLink
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
           Discover region-specific genetic disease risks based on your heritage and ethnicity.

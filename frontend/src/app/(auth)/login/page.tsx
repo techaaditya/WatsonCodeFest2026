@@ -58,8 +58,8 @@ export default function LoginPage() {
             <Link href="/" className="inline-flex items-center gap-2 group">
               <Dna className="h-8 w-8 text-olive transition-transform duration-500 group-hover:rotate-180" />
               <span className="text-2xl font-bold">
-                <span className="text-olive">Geno</span>
-                <span className="text-softgreen">Vault</span>
+                <span className="text-olive">DNA</span>
+                <span className="text-softgreen">Dristi</span>
               </span>
             </Link>
             <p className="mt-3 text-slate/80 text-sm">
