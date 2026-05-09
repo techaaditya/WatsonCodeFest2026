@@ -55,7 +55,7 @@ export function DualParentInput({ mode, onPredict, isLoading }: DualParentInputP
     label: string;
     value: string;
     onChange: (v: string) => void;
-    icon: JSX.Element;
+    icon: React.ReactNode;
   }) => (
     <Card className="border-border/60 bg-card/75 backdrop-blur-xl shadow-sm">
       <CardHeader>
@@ -136,8 +136,8 @@ export function DualParentInput({ mode, onPredict, isLoading }: DualParentInputP
           className="relative inline-flex h-14 w-64 overflow-hidden rounded-full p-[2px] focus:outline-none focus:ring-2 focus:ring-olive/30 focus:ring-offset-2 focus:ring-offset-cream transition-transform active:scale-95 disabled:scale-100 disabled:opacity-70"
         >
           <span className="absolute inset-[-1000%] animate-[spin_5s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#546B41_0%,#99AD7A_50%,#DCCCAC_100%)]" />
-          <span className="inline-flex h-full w-full cursor-pointer items-center justify-center rounded-full bg-olive px-8 py-1 text-lg font-bold text-cream transition-colors hover:bg-softgreen hover:text-slate">
-            {isLoading ? "Analyzing..." : "Analyze Genomic Data"}
+          <span className="relative z-10 inline-flex h-full w-full cursor-pointer items-center justify-center rounded-full bg-olive px-8 py-1 text-lg font-bold text-cream transition-colors hover:bg-softgreen hover:text-slate backdrop-blur-3xl">
+            {isLoading ? "Analyzing..." : "Analyze"}
           </span>
         </button>
       </div>

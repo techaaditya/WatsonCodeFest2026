@@ -192,18 +192,30 @@ def run_prediction(input_data: PredictionInput) -> Dict[str, Any]:
     for disease_name in genes:
         gene = model_params[disease_name]["gene"]
         h_f = calculate_homology(seq_f, REFERENCE_GENES[gene])
-        pm_f = sigmoid_probability(h_f, model_params[disease_name]["lambda"], model_params[disease_name]["T"])
+        if h_f < 0.5:
+            h_f = 1.0
+            pm_f = 0.0
+        else:
+            pm_f = sigmoid_probability(h_f, model_params[disease_name]["lambda"], model_params[disease_name]["T"])
         gf = "M/M" if pm_f >= 0.75 else "N/M" if pm_f >= 0.25 else "N/N"
 
         if mode == "parents" and seq_m is not None:
             h_m = calculate_homology(seq_m, REFERENCE_GENES[gene])
-            pm_m = sigmoid_probability(h_m, model_params[disease_name]["lambda"], model_params[disease_name]["T"])
+            if h_m < 0.5:
+                h_m = 1.0
+                pm_m = 0.0
+            else:
+                pm_m = sigmoid_probability(h_m, model_params[disease_name]["lambda"], model_params[disease_name]["T"])
             gm = "M/M" if pm_m >= 0.75 else "N/M" if pm_m >= 0.25 else "N/N"
             probs = _autosomal_parents_probs(pm_f, pm_m)
         else:
-            # Individual mode fallback: assume unknown partner contributes wild-type.
+            # Individual mode: Predict the individual's own risk profile assuming the sequence reflects their allele frequency
             h_m, gm, pm_m = 1.0, "N/N", 0.0
-            probs = _autosomal_parents_probs(pm_f, pm_m)
+            probs = {
+                "affected": pm_f ** 2,
+                "carrier": 2 * pm_f * (1.0 - pm_f),
+                "healthy": (1.0 - pm_f) ** 2
+            }
 
         severity_label = _severity_from_homology(min(h_f, h_m))
         affected_probs_for_joint[disease_name] = probs["affected"]
@@ -237,15 +249,24 @@ def run_prediction(input_data: PredictionInput) -> Dict[str, Any]:
 
     # Y-linked AZF model
     azf_scores = {}
+    is_azf_supplied = False
     for marker in ["AZFA_sY84", "AZFA_sY86", "AZFB_sY127", "AZFB_sY134", "AZFC_sY254", "AZFC_sY255"]:
         identity, _ = _smith_waterman_identity(seq_f, REFERENCE_GENES[marker])
+        if identity > 40.0:
+            is_azf_supplied = True
         azf_scores[marker] = 1.0 - (identity / 100.0)
-    azfa = max(azf_scores["AZFA_sY84"], azf_scores["AZFA_sY86"])
-    azfb = max(azf_scores["AZFB_sY127"], azf_scores["AZFB_sY134"])
-    azfc = max(azf_scores["AZFC_sY254"], azf_scores["AZFC_sY255"])
+    
+    if not is_azf_supplied:
+        azfa = azfb = azfc = 0.0
+        h_azf = 1.0
+        y_prob = 0.0
+    else:
+        azfa = max(azf_scores["AZFA_sY84"], azf_scores["AZFA_sY86"])
+        azfb = max(azf_scores["AZFB_sY127"], azf_scores["AZFB_sY134"])
+        azfc = max(azf_scores["AZFC_sY254"], azf_scores["AZFC_sY255"])
+        h_azf = max(0.0, min(1.0, 1.0 - max(azfa, azfb, azfc)))
+        y_prob = sigmoid_probability(h_azf, model_params["Y-Chromosome Infertility"]["lambda"], model_params["Y-Chromosome Infertility"]["T"])
 
-    h_azf = max(0.0, min(1.0, 1.0 - max(azfa, azfb, azfc)))
-    y_prob = sigmoid_probability(h_azf, model_params["Y-Chromosome Infertility"]["lambda"], model_params["Y-Chromosome Infertility"]["T"])
     affected_probs_for_joint["Y-Chromosome Infertility"] = y_prob
     homology_scores["Y-Chromosome Infertility"] = {"father": round(h_azf, 4), "mother": 1.0}
     y_severity = _severity_from_homology(h_azf, is_y=True)
@@ -273,10 +294,18 @@ def run_prediction(input_data: PredictionInput) -> Dict[str, Any]:
     if mode == "parents" and seq_m is not None:
         abo_m = _detect_abo_allele(seq_m)
         rh_m = _detect_rhd(seq_m)
+        blood_dist = _blood_distribution(abo_f + "O", abo_m + "O", rh_f + "-", rh_m + "-")
     else:
         abo_m = abo_f
         rh_m = rh_f
-    blood_dist = _blood_distribution(abo_f + "O", abo_m + "O", rh_f + "-", rh_m + "-")
+        # Individual mode: exact blood group based on phenotype
+        bg_pheno = "AB" if "A" in abo_f and "B" in abo_f else abo_f
+        rh_pheno = "positive" if rh_f == "+" else "negative"
+        blood_dist = {f"{bg_pheno}_{rh_pheno}": 100.0}
+        for key in ["A_positive", "A_negative", "B_positive", "B_negative", "AB_positive", "AB_negative", "O_positive", "O_negative"]:
+            if key not in blood_dist:
+                blood_dist[key] = 0.0
+
     if all(v == 0 for v in blood_dist.values()):
         blood_dist = {
             "O_positive": 33.0,

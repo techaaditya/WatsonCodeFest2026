@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, AlertCircle } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -9,7 +9,7 @@ import { DualParentInput } from "@/components/prediction/DualParentInput";
 import { PredictionResults } from "@/components/prediction/PredictionResults";
 import { api } from "@/services/api";
 
-export default function PredictPage() {
+function PredictContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const mode = searchParams.get("mode") === "dual" ? "parents" : "individual";
@@ -90,5 +90,13 @@ export default function PredictPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function PredictPage() {
+  return (
+    <Suspense fallback={<div className="p-6 text-center text-muted-foreground">Loading...</div>}>
+      <PredictContent />
+    </Suspense>
   );
 }
