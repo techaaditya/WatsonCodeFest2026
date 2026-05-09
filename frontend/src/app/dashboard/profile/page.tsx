@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { mockAuth } from "@/lib/supabase/client";
+import { createClient } from "@/utils/supabase/client";
 import { toast } from "sonner";
 
 export default function ProfilePage() {
@@ -19,17 +19,26 @@ export default function ProfilePage() {
   const [ethnicity, setEthnicity] = useState("");
 
   useEffect(() => {
-    const user = mockAuth.getUser();
-    if (user) {
-      setFullName(user.full_name || "");
-      setEmail(user.email || "");
-    }
+    const fetchUser = async () => {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setFullName(user.user_metadata?.full_name || "");
+        setEmail(user.email || "");
+      }
+    };
+    fetchUser();
   }, []);
 
-  const handleSave = () => {
-    const user = mockAuth.getUser();
-    if (user) {
-      mockAuth.setUser({ ...user, full_name: fullName, email });
+  const handleSave = async () => {
+    const supabase = createClient();
+    const { error } = await supabase.auth.updateUser({
+      email,
+      data: { full_name: fullName }
+    });
+    if (error) {
+      toast.error(error.message);
+    } else {
       toast.success("Profile updated successfully!");
     }
   };

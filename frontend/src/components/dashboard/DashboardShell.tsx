@@ -14,7 +14,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { mockAuth } from "@/lib/supabase/client";
+import { createClient } from "@/utils/supabase/client";
 
 const sidebarLinks = [
   { icon: FlaskConical, label: "Prediction Lab", href: "/dashboard" },
@@ -32,16 +32,21 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const [userName, setUserName] = useState("User");
 
   useEffect(() => {
-    const user = mockAuth.getUser();
-    if (!user) {
-      router.push("/login");
-      return;
-    }
-    setUserName(user.full_name || "User");
+    const checkUser = async () => {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        router.push("/login");
+        return;
+      }
+      setUserName(user.user_metadata?.full_name || user.email || "User");
+    };
+    checkUser();
   }, [router]);
 
-  const handleLogout = () => {
-    mockAuth.removeUser();
+  const handleLogout = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
     router.push("/");
   };
 

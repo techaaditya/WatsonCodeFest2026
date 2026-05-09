@@ -4,15 +4,19 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Users, User, ArrowRight, FlaskConical, Shield, Droplets, HeartPulse, Activity } from "lucide-react";
-import { mockAuth } from "@/lib/supabase/client";
+import { createClient } from "@/utils/supabase/client";
 
 export default function PredictionLabPage() {
   const router = useRouter();
   const [userName, setUserName] = useState("User");
 
   useEffect(() => {
-    const user = mockAuth.getUser();
-    if (user) setUserName(user.full_name || "User");
+    const fetchUser = async () => {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) setUserName(user.user_metadata?.full_name || user.email || "User");
+    };
+    fetchUser();
   }, []);
 
   const quickStats = [

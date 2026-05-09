@@ -8,7 +8,7 @@ import { Dna, Eye, EyeOff, Mail, Lock, User, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { mockAuth } from "@/lib/supabase/client";
+import { createClient } from "@/utils/supabase/client";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -32,12 +32,24 @@ export default function SignupPage() {
       return;
     }
     setLoading(true);
+    
+    const supabase = createClient();
+    
     try {
-      const { user } = await mockAuth.signUp(email, password, fullName);
-      if (user) {
-        mockAuth.setUser({ id: user.id, email: user.email, full_name: user.full_name });
-        router.push("/dashboard");
+      const { error: authError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { full_name: fullName },
+        },
+      });
+      
+      if (authError) {
+        setError(authError.message);
+        return;
       }
+      
+      router.push("/dashboard");
     } catch {
       setError("An error occurred. Please try again.");
     } finally {
@@ -141,7 +153,10 @@ export default function SignupPage() {
           </div>
 
           <Button variant="outline" className="w-full h-11 rounded-full border-beige hover:bg-beige/25 text-slate"
-            onClick={() => { mockAuth.setUser({ id: "g-user", email: "user@gmail.com", full_name: "Google User" }); router.push("/dashboard"); }}>
+            onClick={async () => { 
+              const supabase = createClient();
+              await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: `${window.location.origin}/auth/callback?next=/dashboard` } });
+            }}>
             <svg className="h-4 w-4 mr-2" viewBox="0 0 24 24">
               <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
               <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>

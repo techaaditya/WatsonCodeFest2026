@@ -8,7 +8,7 @@ import { Dna, Eye, EyeOff, Mail, Lock, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { mockAuth } from "@/lib/supabase/client";
+import { createClient } from "@/utils/supabase/client";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -22,17 +22,21 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     setError("");
+    
+    const supabase = createClient();
 
     try {
-      const { user, error: authError } = await mockAuth.signInWithPassword(email, password);
+      const { error: authError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      
       if (authError) {
-        setError("Invalid email or password");
+        setError(authError.message);
         return;
       }
-      if (user) {
-        mockAuth.setUser({ id: user.id, email: user.email, full_name: user.full_name });
-        router.push("/dashboard");
-      }
+      
+      router.push("/dashboard");
     } catch {
       setError("An error occurred. Please try again.");
     } finally {
@@ -151,9 +155,9 @@ export default function LoginPage() {
           <Button
             variant="outline"
             className="w-full h-11 rounded-full border-beige hover:bg-beige/25 transition-all duration-300 text-slate"
-            onClick={() => {
-              mockAuth.setUser({ id: "google-user", email: "user@gmail.com", full_name: "Google User" });
-              router.push("/dashboard");
+            onClick={async () => {
+              const supabase = createClient();
+              await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: `${window.location.origin}/auth/callback?next=/dashboard` } });
             }}
           >
             <svg className="h-4 w-4 mr-2" viewBox="0 0 24 24">
