@@ -39,13 +39,13 @@ const suggestions = [
   "What is Y-chromosome infertility?",
 ];
 
-export default function GeniePage() {
+export default function GeneiePage() {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "welcome",
       role: "assistant",
       response:
-        "Welcome to **Genie**.\n\nThis is a clinical explainer to help you understand genetic diseases, inheritance patterns, and carrier risks.\n\nChoose a suggested topic below or type your question.",
+        "Welcome to **Geneie**.\n\nThis is a clinical explainer to help you understand genetic diseases, inheritance patterns, and carrier risks.\n\nChoose a suggested topic below or type your question.",
       timestamp: new Date(),
     },
   ]);
@@ -127,7 +127,7 @@ export default function GeniePage() {
           m.id === assistantId
             ? {
                 ...m,
-                response: "I could not reach the local Genie model. Please ensure Ollama is running with medgemma1.5:4b.",
+                response: "I could not reach the local Geneie model. Please ensure Ollama is running with medgemma1.5:4b.",
               }
             : m
         )
@@ -145,7 +145,7 @@ export default function GeniePage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-2">
-              <Bot className="h-6 w-6 text-olive" /> Genie
+              <Bot className="h-6 w-6 text-olive" /> Geneie
             </h1>
             <p className="text-sm text-slate/80 mt-0.5">Genetic counseling, explained clearly.</p>
           </div>

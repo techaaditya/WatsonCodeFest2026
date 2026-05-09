@@ -13,14 +13,14 @@ const features = [
   },
   {
     icon: Microscope,
-    title: "HelixVision",
+    title: "Gene Analysis",
     description: "Interactive chromosome browser with karyotype view, gene region highlighting, and mutation location mapping across all 23 pairs.",
     color: "#14b8a6",
     bgGlow: "rgba(20, 184, 166, 0.08)",
   },
   {
     icon: Bot,
-    title: "Genie",
+    title: "Geneie",
     description: "AI-powered genetic counselor with general Q&A and Get Specific mode for deep-diving into genes with environmental parameters.",
     color: "#f59e0b",
     bgGlow: "rgba(245, 158, 11, 0.08)",
@@ -34,7 +34,7 @@ const features = [
   },
   {
     icon: MapPin,
-    title: "LineageLink",
+    title: "Community Risks",
     description: "Community risk profiling based on Nepal's regions and ethnic groups, showing prevalent diseases and screening recommendations.",
     color: "#f97316",
     bgGlow: "rgba(249, 115, 22, 0.08)",

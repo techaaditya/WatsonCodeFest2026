@@ -141,7 +141,7 @@ function ResultBanner({ result, title }: { result: any, title: string }) {
   );
 }
 
-export default function HelixVisionPage() {
+export default function GeneAnalysisPage() {
   const [selectedDisease, setSelectedDisease] = useState<string | null>("sickle_cell");
   const [mode, setMode] = useState<"individual" | "parents">("individual");
   const [isLoading, setIsLoading] = useState(false);
@@ -212,7 +212,7 @@ export default function HelixVisionPage() {
     <div className="max-w-5xl mx-auto space-y-8 pb-20">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="print-hidden">
         <h1 className="text-3xl font-bold flex items-center gap-2">
-          <Microscope className="h-8 w-8 text-gene-teal" /> HelixVision
+          <Microscope className="h-8 w-8 text-gene-teal" /> Gene Analysis
         </h1>
         <p className="text-muted-foreground mt-2">
           Targeted clinical genetic analysis for specific monogenetic diseases.

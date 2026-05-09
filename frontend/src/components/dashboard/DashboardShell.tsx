@@ -18,10 +18,10 @@ import { createClient } from "@/utils/supabase/client";
 
 const sidebarLinks = [
   { icon: FlaskConical, label: "Prediction Lab", href: "/dashboard" },
-  { icon: Microscope, label: "HelixVision", href: "/dashboard/chromolens" },
-  { icon: Bot, label: "Genie", href: "/dashboard/genoguide" },
+  { icon: Microscope, label: "Gene Analysis", href: "/dashboard/chromolens" },
+  { icon: Bot, label: "Geneie", href: "/dashboard/genoguide" },
   { icon: GraduationCap, label: "Gene Academy", href: "/dashboard/academy" },
-  { icon: MapPin, label: "LineageLink", href: "/dashboard/heritage" },
+  { icon: MapPin, label: "Community Risks", href: "/dashboard/heritage" },
 ];
 
 export function DashboardShell({ children }: { children: React.ReactNode }) {

@@ -8,11 +8,11 @@
 
 1. **Prediction Lab**
    Comprehensive genetic analysis available in "Parent Compatible" or "Individual" modes. It features dynamic Punnett square visualization, disease risk scoring, blood group prediction, and immunity assessments.
-2. **HelixVision**
+2. **Gene Analysis**
    An interactive chromosome browser that provides a karyotype view, highlights specific gene regions, and maps mutation locations across all 23 chromosome pairs.
-3. **Genie**
-   Your personal AI-powered genetic counselor. Genie offers general Q&A and clinical explanations to help users understand complex inheritance patterns and carrier risks, powered by a local medical LLM.
-4. **LineageLink**
+3. **Geneie**
+   Your personal AI-powered genetic counselor. Geneie offers general Q&A and clinical explanations to help users understand complex inheritance patterns and carrier risks, powered by a local medical LLM.
+4. **Community Risks**
    A heritage mapping tool that profiles community risk based on specific regions and ethnic groups in Nepal, displaying prevalent diseases and screening recommendations.
 5. **Gene Academy**
    Bite-sized educational modules covering DNA basics, inheritance patterns, mutations, and how to interpret genetic predictions.
@@ -37,7 +37,7 @@ Follow these instructions to get the project up and running on your local machin
 - [Node.js](https://nodejs.org/) (v18+)
 - [Python](https://www.python.org/) (3.10+)
 - [Supabase](https://supabase.com/) Account & Project
-- [Ollama](https://ollama.com/) (with `medgemma1.5:4b` pulled locally for Genie)
+- [Ollama](https://ollama.com/) (with `medgemma1.5:4b` pulled locally for Geneie)
 - [Git LFS](https://git-lfs.com/)
 
 ### 1. Clone the Repository & Pull LFS Data
