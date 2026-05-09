@@ -19,10 +19,14 @@ const modules = [
     type: "video",
     content: (
       <div className="space-y-4">
-        <div className="aspect-video bg-slate-900 rounded-xl overflow-hidden relative flex items-center justify-center group cursor-pointer">
-          <img src="https://images.unsplash.com/photo-1530026405186-ed1f139313f8?q=80&w=2670&auto=format&fit=crop" alt="DNA Double Helix" className="opacity-50 object-cover w-full h-full absolute inset-0" />
-          <PlayCircle className="h-16 w-16 text-white z-10 group-hover:scale-110 transition-transform" />
-          <div className="absolute top-4 left-4 bg-black/50 text-white text-xs px-2 py-1 rounded">Genetics 101</div>
+        <div className="aspect-video bg-slate-900 rounded-xl overflow-hidden relative flex items-center justify-center group">
+          <video 
+            src="/gene-academy-demo-video.mp4" 
+            controls 
+            className="w-full h-full object-cover"
+            poster="https://images.unsplash.com/photo-1530026405186-ed1f139313f8?q=80&w=2670&auto=format&fit=crop"
+          />
+          <div className="absolute top-4 left-4 bg-black/50 text-white text-xs px-2 py-1 rounded pointer-events-none">Genetics 101</div>
         </div>
         <div>
           <h4 className="font-semibold text-lg mb-2">Quick Read: Core Concepts</h4>
