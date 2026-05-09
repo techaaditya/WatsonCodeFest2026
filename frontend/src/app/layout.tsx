@@ -11,9 +11,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "GenoVault — Decode Your Legacy",
+  title: "DNADristi — Decode Your Legacy",
   description:
-    "GenoVault is an advanced genomic disease prediction platform that uses probabilistic models and Monogenic Risk Scores to predict inherited disease risks, carrier status, and genetic traits.",
+    "DNADristi is an advanced genomic disease prediction platform that uses probabilistic models and Monogenic Risk Scores to predict inherited disease risks, carrier status, and genetic traits.",
   keywords: [
     "genomics",
     "genetic prediction",

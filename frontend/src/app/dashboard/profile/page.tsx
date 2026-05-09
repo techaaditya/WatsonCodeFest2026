@@ -54,11 +54,11 @@ export default function ProfilePage() {
           </AvatarFallback>
         </Avatar>
         <div className="text-center sm:text-left">
-          <h2 className="text-xl font-bold">{fullName || "GenoVault User"}</h2>
-          <p className="text-sm text-muted-foreground mt-1">{email || "user@genovault.com"}</p>
+          <h2 className="text-xl font-bold">{fullName || "DNADristi User"}</h2>
+          <p className="text-sm text-muted-foreground mt-1">{email || "user@dnadristi.com"}</p>
           <div className="flex items-center gap-2 mt-3 justify-center sm:justify-start">
             <Dna className="h-4 w-4 text-gene-emerald" />
-            <span className="text-xs text-gene-emerald font-medium">GenoVault Member</span>
+            <span className="text-xs text-gene-emerald font-medium">DNADristi Member</span>
           </div>
         </div>
       </motion.div>

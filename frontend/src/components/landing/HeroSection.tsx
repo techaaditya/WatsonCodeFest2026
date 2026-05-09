@@ -62,17 +62,17 @@ export function HeroSection() {
           <Link href="/signup">
             <Button
               size="lg"
-              className="rounded-full bg-olive text-cream font-semibold px-8 h-12 text-base transition-colors duration-300 hover:bg-softgreen hover:text-slate group"
+              className="group h-auto rounded-full bg-gradient-to-b from-[#6b8554] to-olive px-8 py-4 text-base font-semibold text-cream shadow-[0_8px_30px_rgba(95,120,70,0.18),inset_0_1px_1px_rgba(255,255,255,0.3)] backdrop-blur-sm transition-all duration-300 ease-out hover:-translate-y-[2px] hover:brightness-110 hover:shadow-[0_12px_40px_rgba(95,120,70,0.3)]"
             >
               Get Started
-              <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+              <ArrowRight className="ml-2 h-5 w-5 transition-transform duration-300 ease-out group-hover:translate-x-1.5 group-hover:scale-105" />
             </Button>
           </Link>
           <a href="#how-it-works">
             <Button
               size="lg"
               variant="outline"
-              className="rounded-full border-beige text-olive hover:bg-beige/25 hover:border-beige px-8 h-12 text-base transition-all duration-300"
+              className="h-auto rounded-full border border-olive/25 bg-transparent px-8 py-4 text-base font-medium text-olive shadow-[inset_0_1px_0_rgba(255,255,255,0.2)] backdrop-blur-sm transition-all duration-300 ease-out hover:scale-[1.02] hover:bg-beige/40 hover:text-olive"
             >
               Learn More
             </Button>

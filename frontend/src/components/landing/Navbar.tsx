@@ -41,8 +41,8 @@ export function Navbar() {
               <Dna className="h-8 w-8 text-olive transition-transform duration-500 group-hover:rotate-180" />
             </div>
             <span className="text-xl font-bold tracking-tight">
-              <span className="text-olive">Geno</span>
-              <span className="text-softgreen">Vault</span>
+              <span className="text-olive">DNA</span>
+              <span className="text-softgreen">Dristi</span>
             </span>
           </Link>
 
@@ -65,13 +65,13 @@ export function Navbar() {
             <Link href="/login">
               <Button
                 variant="ghost"
-                className="text-slate hover:text-olive hover:bg-beige/30 font-medium rounded-full px-5"
+                className="rounded-full border border-olive/25 bg-transparent px-6 font-medium text-olive backdrop-blur-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.2)] transition-all duration-300 ease-out hover:scale-[1.02] hover:bg-beige/40 hover:text-olive"
               >
                 Log In
               </Button>
             </Link>
             <Link href="/signup">
-              <Button className="rounded-full bg-olive text-cream font-semibold px-7 transition-colors duration-300 hover:bg-softgreen hover:text-slate">
+              <Button className="rounded-full bg-gradient-to-b from-[#6b8554] to-olive px-7 font-medium text-cream shadow-[0_8px_30px_rgba(95,120,70,0.18),inset_0_1px_1px_rgba(255,255,255,0.3)] backdrop-blur-sm transition-all duration-300 ease-out hover:-translate-y-[2px] hover:brightness-110 hover:shadow-[0_12px_40px_rgba(95,120,70,0.25)]">
                 Sign Up
               </Button>
             </Link>
@@ -111,12 +111,12 @@ export function Navbar() {
               ))}
               <div className="flex flex-col gap-2 pt-4 border-t border-beige">
                 <Link href="/login" onClick={() => setMobileOpen(false)}>
-                  <Button variant="ghost" className="w-full justify-center text-slate hover:text-olive rounded-full">
+                  <Button variant="ghost" className="w-full justify-center rounded-full border border-olive/25 bg-transparent px-6 font-medium text-olive backdrop-blur-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.2)] transition-all duration-300 ease-out hover:scale-[1.02] hover:bg-beige/40 hover:text-olive">
                     Log In
                   </Button>
                 </Link>
                 <Link href="/signup" onClick={() => setMobileOpen(false)}>
-                  <Button className="w-full rounded-full bg-olive text-cream font-semibold hover:bg-softgreen hover:text-slate">
+                  <Button className="w-full justify-center rounded-full bg-gradient-to-b from-[#6b8554] to-olive px-7 font-medium text-cream shadow-[0_8px_30px_rgba(95,120,70,0.18),inset_0_1px_1px_rgba(255,255,255,0.3)] backdrop-blur-sm transition-all duration-300 ease-out hover:-translate-y-[2px] hover:brightness-110 hover:shadow-[0_12px_40px_rgba(95,120,70,0.25)]">
                     Sign Up
                   </Button>
                 </Link>

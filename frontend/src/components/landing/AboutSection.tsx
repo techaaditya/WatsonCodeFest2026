@@ -16,14 +16,14 @@ export function AboutSection() {
             transition={{ duration: 0.7 }}
           >
             <span className="text-sm font-semibold text-gene-amber uppercase tracking-widest">
-              About GenoVault
+              About DNADristi
             </span>
             <h2 className="mt-4 text-3xl sm:text-4xl font-bold leading-tight">
               Empowering Nepal&apos;s{" "}
               <span className="gene-gradient-text">Genomic Future</span>
             </h2>
             <p className="mt-6 text-muted-foreground leading-relaxed text-lg">
-              GenoVault is an advanced genomic analysis platform designed to make
+              DNADristi is an advanced genomic analysis platform designed to make
               genetic disease prediction accessible and understandable. By
               leveraging probabilistic models and Monogenic Risk Scores, we help
               families understand their inherited disease risks before they
@@ -31,7 +31,7 @@ export function AboutSection() {
             </p>
             <p className="mt-4 text-muted-foreground leading-relaxed">
               Built specifically with Nepal&apos;s underdiagnosed carrier
-              populations in mind, GenoVault addresses the critical gap in
+              populations in mind, DNADristi addresses the critical gap in
               genetic screening access across South Asia. Our platform analyzes
               key monogenic diseases prevalent in the region, providing
               actionable genetic insights.
